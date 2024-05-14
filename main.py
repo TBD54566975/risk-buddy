@@ -7,6 +7,9 @@ app = Flask(__name__)
 # Path to the directory containing the rule files
 RULES_DIR = './rules'
 
+# Default model
+DEFAULT_MODEL = 'phi3'
+
 # Load rules from disk
 def load_rules():
     rules = []
@@ -36,8 +39,8 @@ def score_data(model, prompt):
 @app.route('/api/score', methods=['POST'])
 def score():
     try:
-        data = request.json['data']
-        model = request.json['model']
+        data = request.json.get('data')
+        model = request.json.get('model', DEFAULT_MODEL)
         
         # Load rules
         rules = load_rules()
