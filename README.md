@@ -15,7 +15,7 @@ Looking at using SLMs/LLMs combined with rules in natural language to score risk
 
 ## API
 
-Simple text based access.
+Simple text based access - really any format can work. 
 
 Then to access: 
 
@@ -27,6 +27,7 @@ curl -X POST http://localhost:8080/api/score -H "Content-Type: application/json"
   }
 }'
 ```
+
 
 
 Try another more complex one: 
@@ -52,7 +53,8 @@ curl -X POST http://localhost:8080/api/score -H "Content-Type: application/json"
 }'
 ```
 
-Will result in something like: 
-```txt
-{"score":"{\n    \"score\": \"medium\",\n    \"reason\": \"The current transaction amount of 20000 is not high risk as it does not exceed 100000. However, considering this account is only 1 month old and has a high transaction volume (with two transactions over 10000 in the same currency), there is potential for medium risk due to unusual activity patterns.\"\n}"}
+Output:
+
+```json
+{"reason":"The current transaction amount of 20000 USD is significant but does not exceed the high-risk threshold of 100000. However, considering this account is only 1 month old and has a bi-weekly transfer frequency which deviates from typical behavior (especially since there are already two transactions in its history), it raises some concern. The transaction amount matches with the stated reason 'Investment', but without additional context or historical data on investments, this could be flagged as medium risk.","risk":"medium"}
 ```
