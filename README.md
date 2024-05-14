@@ -1,10 +1,21 @@
-To try: 
+# Experimental risk scoring engine
+
+Looking at using SLMs/LLMs combined with rules in natural language to score risk (potentialy part of an ensemble approach for risk scoring). 
+
+![image](https://github.com/TBD54566975/risky-buddy/assets/14976/3d5cb56c-f94a-466c-babb-f0c2fb8924b3)
+
+
+## Setup 
 
 * get https://ollama.com/ and run it
 * Create rules in `rules/` in plain language
 * `python main.py`
 * Access it and pass in data (any format wrapped in json can work), see below
 
+
+## API
+
+Simple text based access.
 
 Then to access: 
 
