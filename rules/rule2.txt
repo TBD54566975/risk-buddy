@@ -1,1 +1,0 @@
-If the transaction type is transfer, mark it as medium risk.

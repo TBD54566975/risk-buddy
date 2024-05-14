@@ -1,0 +1,1 @@
+If the transaction pattern deviates significantly from the customer's usual behavior, mark it as high risk.

@@ -1,0 +1,1 @@
+If the transaction has withheld information or seems intentionally vague, mark it as high risk.

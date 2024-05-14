@@ -1,0 +1,1 @@
+If the customer frequently requests refunds, mark it as medium risk.
