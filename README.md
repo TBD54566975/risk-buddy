@@ -58,3 +58,53 @@ Output:
 ```json
 {"reason":"The current transaction amount of 20000 USD is significant but does not exceed the high-risk threshold of 100000. However, considering this account is only 1 month old and has a bi-weekly transfer frequency which deviates from typical behavior (especially since there are already two transactions in its history), it raises some concern. The transaction amount matches with the stated reason 'Investment', but without additional context or historical data on investments, this could be flagged as medium risk.","risk":"medium"}
 ```
+
+
+## Example with transaction history: 
+
+```sh
+curl -X POST http://localhost:8080/api/score -H "Content-Type: application/json" -d '{
+  "data": {
+    "account_age_months": 2,
+    "current_transaction": {
+      "amount": 22000,
+      "transaction_type": "investment",
+      "currency": "USD",
+      "from_account": "0x1234567890",
+      "to_account": "0x0987654321",
+      "reason": "Investment in unknown assets",
+      "date": "2024-05-01",
+      "frequency": "monthly"
+    },
+    "transaction_history": [
+      {
+        "amount": 8000,
+        "transaction_type": "investment",
+        "currency": "USD",
+        "from_account": "0x1234567890",
+        "to_account": "0x0987654321",
+        "reason": "Investment in new venture",
+        "date": "2024-04-01"
+      },
+      {
+        "amount": 10000,
+        "transaction_type": "investment",
+        "currency": "USD",
+        "from_account": "0x1234567890",
+        "to_account": "0x0987654321",
+        "reason": "Investment in stocks",
+        "date": "2024-04-15"
+      },
+      {
+        "amount": 22000,
+        "transaction_type": "investment",
+        "currency": "USD",
+        "from_account": "0x1234567890",
+        "to_account": "0x0987654321",
+        "reason": "Investment in unknown assets",
+        "date": "2024-04-25"
+      }
+    ]
+  }
+}'
+```
