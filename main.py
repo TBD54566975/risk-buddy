@@ -2,6 +2,10 @@ from flask import Flask, request, jsonify
 import os
 import requests
 import json
+import subprocess
+import shlex
+import signal
+import time
 
 app = Flask(__name__)
 
@@ -10,6 +14,34 @@ RULES_DIR = './rules'
 
 # Default model
 DEFAULT_MODEL = 'Phi-3-mini-4k-instruct'
+
+# Llamafile details
+LLAMAFILE_URL = 'https://huggingface.co/Mozilla/Phi-3-mini-4k-instruct-llamafile/resolve/main/Phi-3-mini-4k-instruct.F16.llamafile?download=true'
+LLAMAFILE_NAME = 'Phi-3-mini-4k-instruct.F16.llamafile'
+LLAMAFILE_PORT = 9090
+
+# Function to download the llamafile if it does not exist
+def download_llamafile():
+    if not os.path.exists(LLAMAFILE_NAME):
+        print(f'Downloading {LLAMAFILE_NAME}...')
+        response = requests.get(LLAMAFILE_URL)
+        with open(LLAMAFILE_NAME, 'wb') as file:
+            file.write(response.content)
+        os.chmod(LLAMAFILE_NAME, 0o755)
+        print(f'Download completed and set executable permissions for {LLAMAFILE_NAME}.')
+
+# Function to run the llamafile
+def run_llamafile():
+    if not os.path.exists(LLAMAFILE_NAME):
+        raise FileNotFoundError(f'{LLAMAFILE_NAME} does not exist.')
+
+    print(f'Running {LLAMAFILE_NAME} on port {LLAMAFILE_PORT}...')
+    llamafile_process = subprocess.Popen(f'./{LLAMAFILE_NAME} --port {LLAMAFILE_PORT}', 
+                                         shell=True, 
+                                         stdout=subprocess.PIPE, 
+                                         stderr=subprocess.PIPE)
+    time.sleep(5)  # Wait for a few seconds to let the server start
+    return llamafile_process
 
 # Load rules from disk
 def load_rules():
@@ -38,7 +70,7 @@ def format_prompt(data, rules):
 
 # Call the LLaMAfile API to score the data
 def score_data(model, prompt):
-    response = requests.post('http://localhost:9090/completion', json={
+    response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
         'prompt': prompt,
         'n_predict': 150,  # Limit the response length
         'temperature': 0.7,  # Adjust the randomness of the generated text
@@ -79,4 +111,10 @@ def score():
         return jsonify({'error': error_message}), 500
 
 if __name__ == '__main__':
-    app.run(port=8080)
+    download_llamafile()
+    llamafile_process = run_llamafile()
+    try:
+        app.run(port=8080)
+    finally:
+        llamafile_process.send_signal(signal.SIGINT)
+        llamafile_process.wait()
