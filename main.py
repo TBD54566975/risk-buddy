@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import os
 import requests
+import json
 
 app = Flask(__name__)
 
@@ -8,7 +9,7 @@ app = Flask(__name__)
 RULES_DIR = './rules'
 
 # Default model
-DEFAULT_MODEL = 'phi3'
+DEFAULT_MODEL = 'Phi-3-mini-4k-instruct'
 
 # Load rules from disk
 def load_rules():
@@ -19,22 +20,39 @@ def load_rules():
                 rules.append(file.read().strip())
     return rules
 
-# Format the prompt for the Ollama API
+# Format the prompt for the LLaMAfile API
 def format_prompt(data, rules):
     rules_text = '\n'.join(rules)
-    prompt = f"Rules:\n{rules_text}\n\nData:\n{data}\n\nEvaluate the data based on the rules and return a score (high, medium, low):"
+    prompt = (
+        f"### Rules\n"
+        f"{rules_text}\n\n"
+        f"### Data\n"
+        f"{json.dumps(data, indent=2)}\n\n"
+        f"### Task\n"
+        f"Based on the rules provided, evaluate the data and return a JSON response with the fields:\n"
+        f"- score: one of 'high', 'medium', or 'low'\n"
+        f"- justification: a detailed explanation based on the rules and data\n\n"
+        f"Ensure the response is formatted as valid JSON without any additional text or explanations."
+    )
     return prompt
 
-# Call the Ollama API to score the data
+# Call the LLaMAfile API to score the data
 def score_data(model, prompt):
-    response = requests.post('http://localhost:11434/api/generate', json={
-        'model': model,
+    response = requests.post('http://localhost:9090/completion', json={
         'prompt': prompt,
-        'stream': False,
-        'format': 'json'
+        'n_predict': 150,  # Limit the response length
+        'temperature': 0.7,  # Adjust the randomness of the generated text
     })
     response_data = response.json()
-    return response_data['response'].strip()
+    # Extract the JSON content from the response
+    response_text = response_data['content'].strip()
+    start = response_text.find('{')
+    end = response_text.rfind('}') + 1
+    if start != -1 and end != -1:
+        json_response = response_text[start:end]
+    else:
+        json_response = '{}'
+    return json_response
 
 @app.route('/api/score', methods=['POST'])
 def score():
@@ -48,12 +66,17 @@ def score():
         # Format the prompt
         prompt = format_prompt(data, rules)
         
-        # Get the score from Ollama API
+        # Get the score from LLaMAfile API
         score = score_data(model, prompt)
         
-        return jsonify({'score': score})
+        # Print the score and any potential error
+        print("Score:", score)
+        
+        return jsonify(json.loads(score))
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        error_message = str(e)
+        print("Error:", error_message)
+        return jsonify({'error': error_message}), 500
 
 if __name__ == '__main__':
     app.run(port=8080)
