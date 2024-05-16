@@ -7,10 +7,9 @@ Looking at using SLMs/LLMs combined with rules in natural language to score risk
 
 ## Setup 
 
-* get https://ollama.com/ and run it
 * Create rules in `rules/` in plain language
-* `python main.py`
-* Access it and pass in data (any format wrapped in json can work), see below
+* `python main.py` (first time will take a while as it downloads a phi3 llamafile - should work on any platform)
+* Pass in data (any format wrapped in json can work), see below for examples and get a score and justification back.
 
 
 ## API
