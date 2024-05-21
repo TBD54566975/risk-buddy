@@ -107,3 +107,27 @@ curl -X POST http://localhost:8080/api/score -H "Content-Type: application/json"
   }
 }'
 ```
+
+
+# Models
+
+Currently have been looking at the `phi3` model from MSFT, which is ASF2 licensed, and quite good at reasoning yet small.
+The 128k variant is favoured as it can comprehend a realistic set of rules and data in one hit. 
+
+## Hosting models
+
+For this to work an LLM model has to be hosted. Currently using llamafiles for developtime experience with models from huggingface. 
+
+### Llama files
+Llamafiles are a convenient way to run from Mozilla built on llama.cpp. [See this](https://github.com/Mozilla-Ocho/llamafile). 
+
+Llamafile is a x-platform executable which can be a whole model or can run gguf weights (currently using the latter per model). For example https://huggingface.co/MoMonir/Phi-3-mini-128k-instruct-GGUF - this is a 128k model which can be run with the llamafile. 
+
+### Other ways of hosting models
+
+There are other ways to host models which are not out of the box or platform limited:
+
+* TGI from huggingface is convenient: https://github.com/huggingface/text-generation-inference (docker based, but AMD64 only -  provent at scale server side hosting)
+* https://github.com/vllm-project/vllm - linux specific ways to host LLMs.
+* Ollama: this is technically more of a desktop platform, but is convenient (and written in golang). 
+
