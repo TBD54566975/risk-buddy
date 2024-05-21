@@ -129,5 +129,5 @@ There are other ways to host models which are not out of the box or platform lim
 
 * TGI from huggingface is convenient: https://github.com/huggingface/text-generation-inference (docker based, but AMD64 only -  provent at scale server side hosting)
 * https://github.com/vllm-project/vllm - linux specific ways to host LLMs.
-* Ollama: this is technically more of a desktop platform, but is convenient (and written in golang). 
+* Ollama: this is technically more of a desktop platform, but is convenient (and written in golang). Downsides are that it has out of the box more limited set of models (but you can import them via modelfiles from gguf - so it is viable and convenient in some cases). It can also serve multiple models from one port whereas llamafiles is just one model per port.
 
