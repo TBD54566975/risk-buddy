@@ -26,21 +26,27 @@ def load_rules():
 def format_prompt(data, rules):
     rules_text = '\n'.join(rules)
     prompt = (
-        f"### Rules\n"
+        f"### Rules:\n"
         f"{rules_text}\n\n"
-        f"### Data\n"
+        f"### Transactional Data:\n"
         f"{json.dumps(data, indent=2)}\n\n"
-        f"### Task\n"
-        f"Based on the rules provided, evaluate the data and return the best judgement in JSON format. Detailed reasoning and processing isn't needed:\n"
+        f"### Task:\n"
+        f"Based on the rules provided, evaluate the data and return the best judgement in JSON format. Detailed reasoning and processing isn't needed, but do consider each rule if it may apply:\n"
         f"{{\n"
         f"  \"score\": \"one of 'high', 'medium', or 'low'\",\n"
         f"  \"justification\": \"a brief explanation based on the rules and data as to why the score is this\"\n"
         f"}}\n"
+        f"\n### Evaluation Notes (for internal use):\n"
+        f"- Ensure that each rule is considered.\n"
+        f"- Highlight any transactions that meet the criteria of the rules.\n"
+        f"- Provide a clear justification that references the specific rules that apply.\n"
     )
     return prompt
 
 # Call the LLaMAfile API to score the data
 def score_data(prompt):
+
+    print("prompt", prompt)
     response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
         'prompt': prompt,
         'n_predict': 150,  # Limit the response length
