@@ -11,37 +11,8 @@ app = Flask(__name__)
 
 # Path to the directory containing the rule files
 RULES_DIR = './rules'
-
-# Default model
-DEFAULT_MODEL = 'Phi-3-mini-4k-instruct'
-
-# Llamafile details
-LLAMAFILE_URL = 'https://huggingface.co/Mozilla/Phi-3-mini-4k-instruct-llamafile/resolve/main/Phi-3-mini-4k-instruct.F16.llamafile?download=true'
-LLAMAFILE_NAME = 'Phi-3-mini-4k-instruct.F16.llamafile'
 LLAMAFILE_PORT = 9090
 
-# Function to download the llamafile if it does not exist
-def download_llamafile():
-    if not os.path.exists(LLAMAFILE_NAME):
-        print(f'Downloading {LLAMAFILE_NAME}...')
-        response = requests.get(LLAMAFILE_URL)
-        with open(LLAMAFILE_NAME, 'wb') as file:
-            file.write(response.content)
-        os.chmod(LLAMAFILE_NAME, 0o755)
-        print(f'Download completed and set executable permissions for {LLAMAFILE_NAME}.')
-
-# Function to run the llamafile
-def run_llamafile():
-    if not os.path.exists(LLAMAFILE_NAME):
-        raise FileNotFoundError(f'{LLAMAFILE_NAME} does not exist.')
-
-    print(f'Running {LLAMAFILE_NAME} on port {LLAMAFILE_PORT}...')
-    llamafile_process = subprocess.Popen(f'./{LLAMAFILE_NAME} --port {LLAMAFILE_PORT}', 
-                                         shell=True, 
-                                         stdout=subprocess.PIPE, 
-                                         stderr=subprocess.PIPE)
-    time.sleep(5)  # Wait for a few seconds to let the server start
-    return llamafile_process
 
 # Load rules from disk
 def load_rules():
@@ -69,15 +40,29 @@ def format_prompt(data, rules):
     return prompt
 
 # Call the LLaMAfile API to score the data
-def score_data(model, prompt):
+def score_data(prompt):
     response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
         'prompt': prompt,
         'n_predict': 150,  # Limit the response length
-        'temperature': 0.7,  # Adjust the randomness of the generated text
+        'temperature': 0.0,  # Adjust the randomness of the generated text
     })
     response_data = response.json()
     # Extract the JSON content from the response
     response_text = response_data['content'].strip()
+    print(response_text)
+
+    # Extract the scores from the text incase it has extra context
+
+    response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
+        'prompt': "From the following text, extract valid JSON and return it with just the fields score and justification: " + response_text,
+        'n_predict': 150,  # Limit the response length
+        'temperature': 0.0,  # Adjust the randomness of the generated text
+    })
+
+    response_text = response_data['content'].strip()
+    print(response_text)
+
+
     start = response_text.find('{')
     end = response_text.rfind('}') + 1
     if start != -1 and end != -1:
@@ -86,12 +71,30 @@ def score_data(model, prompt):
         json_response = '{}'
     return json_response
 
+LLAMAFILE_NAME = "llamafile"
+LLAMAFILE_MODEL = "phi-3-mini-128k-instruct.Q8_0.gguf"
+LLAMAFILE_PORT = 9090
+
+def run_llamafile():
+    if not os.path.exists(LLAMAFILE_NAME):
+        raise FileNotFoundError(f'{LLAMAFILE_NAME} does not exist.')
+
+    command = f'./{LLAMAFILE_NAME} -m {LLAMAFILE_MODEL} --port {LLAMAFILE_PORT}'
+    print(f'Running {command}...')
+    
+    llamafile_process = subprocess.Popen(command, 
+                                         shell=True, 
+                                         stdout=subprocess.PIPE, 
+                                         stderr=subprocess.PIPE)
+    time.sleep(5)  # Wait for a few seconds to let the server start
+    return llamafile_process
+
+
 @app.route('/api/score', methods=['POST'])
 def score():
     try:
         data = request.json.get('data')
-        model = request.json.get('model', DEFAULT_MODEL)
-        
+
         # Load rules
         rules = load_rules()
         
@@ -99,7 +102,7 @@ def score():
         prompt = format_prompt(data, rules)
         
         # Get the score from LLaMAfile API
-        score = score_data(model, prompt)
+        score = score_data(prompt)
         
         # Print the score and any potential error
         print("Score:", score)
@@ -111,7 +114,6 @@ def score():
         return jsonify({'error': error_message}), 500
 
 if __name__ == '__main__':
-    download_llamafile()
     llamafile_process = run_llamafile()
     try:
         app.run(port=8080)
