@@ -8,7 +8,7 @@ Looking at using SLMs/LLMs combined with rules in natural language to score risk
 ## Setup 
 
 * Create rules in `rules/` in plain language
-* `python main.py` (first time will take a while as it downloads a phi3 llamafile - should work on any platform)
+* `python main.py` 
 * Pass in data (any format wrapped in json can work), see below for examples and get a score and justification back.
 
 
@@ -112,7 +112,7 @@ curl -X POST http://localhost:8080/api/score -H "Content-Type: application/json"
 # Models
 
 Currently have been looking at the `phi3` model from MSFT, which is ASF2 licensed, and quite good at reasoning yet small.
-The 128k variant is favoured as it can comprehend a realistic set of rules and data in one hit. 
+The 128k variant is favoured as it can comprehend a realistic set of rules and data in one hit. Read more here: https://huggingface.co/microsoft/Phi-3-mini-128k-instruct
 
 ## Hosting models
 
