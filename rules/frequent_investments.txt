@@ -1,0 +1,1 @@
+If there are  more than 2 investment transactions in one month then flag it as high risk 

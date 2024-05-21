@@ -23,7 +23,6 @@ def load_rules():
                 rules.append(file.read().strip())
     return rules
 
-# Format the prompt for the LLaMAfile API
 def format_prompt(data, rules):
     rules_text = '\n'.join(rules)
     prompt = (
@@ -32,10 +31,11 @@ def format_prompt(data, rules):
         f"### Data\n"
         f"{json.dumps(data, indent=2)}\n\n"
         f"### Task\n"
-        f"Based on the rules provided, evaluate the data and return a JSON response with the fields:\n"
-        f"- score: one of 'high', 'medium', or 'low'\n"
-        f"- justification: a detailed explanation based on the rules and data\n\n"
-        f"Ensure the response is formatted as valid JSON without any additional text or explanations."
+        f"Based on the rules provided, evaluate the data and return the best judgement in JSON format. Detailed reasoning and processing isn't needed:\n"
+        f"{{\n"
+        f"  \"score\": \"one of 'high', 'medium', or 'low'\",\n"
+        f"  \"justification\": \"a brief explanation based on the rules and data as to why the score is this\"\n"
+        f"}}\n"
     )
     return prompt
 
@@ -51,16 +51,7 @@ def score_data(prompt):
     response_text = response_data['content'].strip()
     print(response_text)
 
-    # Extract the scores from the text incase it has extra context
-
-    response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
-        'prompt': "From the following text, extract valid JSON and return it with just the fields score and justification: " + response_text,
-        'n_predict': 150,  # Limit the response length
-        'temperature': 0.0,  # Adjust the randomness of the generated text
-    })
-
-    response_text = response_data['content'].strip()
-    print(response_text)
+    print("JSON", response_text)
 
 
     start = response_text.find('{')
