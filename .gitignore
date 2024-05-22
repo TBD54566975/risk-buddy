@@ -1,3 +1,4 @@
 *.llamafile
 llama.log
 *.gguf
+.hermit
