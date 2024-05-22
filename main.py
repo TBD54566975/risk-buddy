@@ -12,6 +12,9 @@ app = Flask(__name__)
 # Path to the directory containing the rule files
 RULES_DIR = './rules'
 LLAMAFILE_PORT = 9090
+LLAMAFILE_NAME = "llamafile"
+LLAMAFILE_MODEL = "phi-3-mini-128k-instruct.Q8_0.gguf"
+LLAMAFILE_PORT = 9090
 
 
 # Load rules from disk
@@ -68,9 +71,6 @@ def score_data(prompt):
         json_response = '{}'
     return json_response
 
-LLAMAFILE_NAME = "llamafile"
-LLAMAFILE_MODEL = "phi-3-mini-128k-instruct.Q8_0.gguf"
-LLAMAFILE_PORT = 9090
 
 def run_llamafile():
     if not os.path.exists(LLAMAFILE_NAME):
