@@ -56,6 +56,7 @@ documents = [
     "Llamas weigh between 280 and 450 pounds and can carry 25 to 30 percent of their body weight",
     "Llamas are vegetarians and have very efficient digestive systems",
     "Llamas live to be about 20 years old, though some only live for 15 years and others live to be 30 years old",
+    "Mic loves dank memes but his 15 year old says that he does them wrong",
 ]
 
 # Add each document to the collection
@@ -68,6 +69,20 @@ prompt = "What animals are llamas related to?"
 # Search for the most relevant document
 results = search(prompt)
 print(results)
+
+
+# An example prompt
+prompt = "So many dank memes"
+
+# Search for the most relevant document
+results = search(prompt)
+print("dank", type(results))
+print("dank", str(results))
+
+prompt = "432432 { tx: 22 }"
+results = search(prompt)
+print("tx", str(results))
+
 
 # Delete documents older than a given age (e.g., 24 hours)
 delete_old_documents(max_age=24*60*60)
