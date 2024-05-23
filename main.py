@@ -119,7 +119,6 @@ def score():
     except Exception as e:
         error_message = str(e)
         print("Error:", error_message)
-        raise e
         return jsonify({'error': error_message}), 500
 
 if __name__ == '__main__':
