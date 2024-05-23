@@ -80,7 +80,7 @@ print("dank", type(results))
 print("dank", str(results))
 
 prompt = "432432 { tx: 22 }"
-results = search(prompt)
+results = search(prompt, n_results=2)
 print("tx", str(results))
 
 
