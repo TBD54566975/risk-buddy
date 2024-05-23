@@ -4,6 +4,16 @@ Looking at using SLMs/LLMs combined with rules in natural language to score risk
 
 ![image](https://github.com/TBD54566975/risky-buddy/assets/14976/3d5cb56c-f94a-466c-babb-f0c2fb8924b3)
 
+## Getting started
+1. Install requirements:
+```bash
+pip install -r requirements.txt
+```
+
+2. Run:
+```bash
+just dev
+```
 
 ## Setup 
 
