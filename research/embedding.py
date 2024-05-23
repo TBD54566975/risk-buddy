@@ -1,4 +1,4 @@
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer, util
 import chromadb
 import hashlib
 import time
@@ -26,8 +26,15 @@ def add_document(document: str):
         metadatas=[{'timestamp': time.time()}]  # Store the current timestamp
     )
 
+# Function to compute cosine similarity between two texts
+def compute_similarity(text1: str, text2: str):
+    embedding1 = embedder.encode(text1, convert_to_tensor=True)
+    embedding2 = embedder.encode(text2, convert_to_tensor=True)
+    cosine_scores = util.pytorch_cos_sim(embedding1, embedding2)
+    return cosine_scores.item()
+
 # Function to search for documents
-def search(prompt: str, n_results: int = 1):
+def search(prompt: str, n_results: int = 1, min_score: float = 0.5):
     # Generate an embedding for the prompt
     prompt_embedding = embedder.encode(prompt).tolist()  # Convert numpy array to list
     
@@ -37,7 +44,14 @@ def search(prompt: str, n_results: int = 1):
         n_results=n_results
     )
     
-    return results['documents'][0]
+    # Calculate similarity scores and filter results based on min_score
+    filtered_results = []
+    for doc in results['documents'][0]:
+        score = compute_similarity(prompt, doc)
+        if score >= min_score:
+            filtered_results.append((doc, score))
+    
+    return filtered_results
 
 # Function to delete documents older than a given age (in seconds)
 def delete_old_documents(max_age: int):
@@ -66,23 +80,18 @@ for doc in documents:
 # An example prompt
 prompt = "What animals are llamas related to?"
 
-# Search for the most relevant document
+# Search for the most relevant document with a minimum similarity score
 results = search(prompt)
 print(results)
 
-
 # An example prompt
 prompt = "So many dank memes"
-
-# Search for the most relevant document
 results = search(prompt)
-print("dank", type(results))
-print("dank", str(results))
+print("dank", results)
 
 prompt = "432432 { tx: 22 }"
 results = search(prompt, n_results=2)
-print("tx", str(results))
-
+print("tx", results)
 
 # Delete documents older than a given age (e.g., 24 hours)
 delete_old_documents(max_age=24*60*60)
