@@ -16,6 +16,9 @@ LLAMAFILE_NAME = "llamafile"
 LLAMAFILE_MODEL = "phi-3-mini-128k-instruct.Q8_0.gguf"
 LLAMAFILE_PORT = 9090
 
+import research.embedding as embedding
+
+
 
 # Load rules from disk
 def load_rules():
@@ -49,7 +52,7 @@ def format_prompt(data, rules):
 # Call the LLaMAfile API to score the data
 def score_data(prompt):
 
-    print("prompt", prompt)
+
     response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
         'prompt': prompt,
         'n_predict': 150,  # Limit the response length
@@ -58,9 +61,7 @@ def score_data(prompt):
     response_data = response.json()
     # Extract the JSON content from the response
     response_text = response_data['content'].strip()
-    print(response_text)
 
-    print("JSON", response_text)
 
 
     start = response_text.find('{')
@@ -91,7 +92,17 @@ def run_llamafile():
 def score():
     try:
         data = request.json.get('data')
+        data_s = json.dumps(data)
+        # strip braces in the string
+        data_s = data_s.replace("{", "").replace("}", "")
 
+        close_tx = embedding.search(data_s, n_results=3)
+        if (close_tx):
+            print("a nearby transaction found")
+            print(close_tx)
+        
+
+        embedding.add_document(data_s)
         # Load rules
         rules = load_rules()
         
@@ -102,12 +113,13 @@ def score():
         score = score_data(prompt)
         
         # Print the score and any potential error
-        print("Score:", score)
+        # print("Score:", score)
         
         return jsonify(json.loads(score))
     except Exception as e:
         error_message = str(e)
         print("Error:", error_message)
+        raise e
         return jsonify({'error': error_message}), 500
 
 if __name__ == '__main__':
