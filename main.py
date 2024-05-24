@@ -16,7 +16,7 @@ LLAMAFILE_NAME = "llamafile"
 LLAMAFILE_MODEL = "phi-3-mini-128k-instruct.Q8_0.gguf"
 LLAMAFILE_PORT = 9090
 
-import research.embedding as embedding
+import embedding as embedding
 
 
 
