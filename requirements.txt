@@ -2,3 +2,4 @@ flask
 requests
 transformers
 chromadb
+sentence_transformers
