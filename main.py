@@ -6,6 +6,7 @@ import subprocess
 import shlex
 import signal
 import time
+import embedding as embedding
 
 app = Flask(__name__)
 
@@ -16,10 +17,6 @@ LLAMAFILE_NAME = "llamafile"
 LLAMAFILE_MODEL = "phi-3-mini-128k-instruct.Q8_0.gguf"
 LLAMAFILE_PORT = 9090
 
-import embedding as embedding
-
-
-
 # Load rules from disk
 def load_rules():
     rules = []
@@ -29,23 +26,34 @@ def load_rules():
                 rules.append(file.read().strip())
     return rules
 
-def format_prompt(data, rules):
+def format_prompt(data, rules, similar_transactions=None):
     rules_text = '\n'.join(rules)
     prompt = (
+        f"Take rules and transactional data and evaluate if any of the rules apply to the transaction, returning only JSON as instructed.\n"
         f"### Rules:\n"
         f"{rules_text}\n\n"
         f"### Transactional Data:\n"
         f"{json.dumps(data, indent=2)}\n\n"
+    )
+
+    if similar_transactions:
+        prompt += "### Possibly Related Transactions:\n\n"
+        for trans, score in similar_transactions:
+            prompt += f"{trans}\n\n"
+
+    prompt += (
+        f"\n### Evaluation Notes (for internal use):\n"
+        f"- Ensure that each rule is considered, but understand that not all rules may apply.\n"
+        f"- Highlight any transactions that meet the criteria of the rules.\n"
+        f"- Provide a clear justification that references the specific rules that apply.\n"                    
+        f"- If any related transactions are present, consider them in evaluating rules that may apply.\n"                    
         f"### Task:\n"
         f"Based on the rules provided, evaluate the data and return the best judgement in JSON format. Not all rules may apply to the data, so only consider relevant rules. Detailed reasoning and processing isn't needed, but do consider each rule if it may apply:\n"
         f"{{\n"
         f"  \"score\": \"one of 'high', 'medium', or 'low'\",\n"
         f"  \"justification\": \"a brief explanation based on the rules and data as to why the score is this\"\n"
         f"}}\n"
-        f"\n### Evaluation Notes (for internal use):\n"
-        f"- Ensure that each rule is considered, but understand that not all rules may apply.\n"
-        f"- Highlight any transactions that meet the criteria of the rules.\n"
-        f"- Provide a clear justification that references the specific rules that apply.\n"
+
     )
     return prompt
 
@@ -62,7 +70,8 @@ def score_data(prompt):
     # Extract the JSON content from the response
     response_text = response_data['content'].strip()
 
-
+    print("response_text", response_text)
+    print("PROMPT", prompt)
 
     start = response_text.find('{')
     end = response_text.rfind('}') + 1
@@ -71,7 +80,6 @@ def score_data(prompt):
     else:
         json_response = '{}'
     return json_response
-
 
 def run_llamafile():
     if not os.path.exists(LLAMAFILE_NAME):
@@ -87,33 +95,30 @@ def run_llamafile():
     time.sleep(5)  # Wait for a few seconds to let the server start
     return llamafile_process
 
-
 @app.route('/api/score', methods=['POST'])
 def score():
     try:
         data = request.json.get('data')
         data_s = json.dumps(data)
         # strip braces in the string
-        data_s = data_s.replace("{", "").replace("}", "")
 
-        close_tx = embedding.search(data_s, n_results=3)
-        if (close_tx):
-            print("a nearby transaction found")
-            print(close_tx)
+        # Step 2: Find similar transactions with high similarity scores
+        similar_transactions = embedding.search(data_s, n_results=3, min_score=0.95)
+        if similar_transactions:
+            print("Nearby transaction(s) found:")
+            print(similar_transactions)
         
-
+        # Add the current transaction to the embeddings
         embedding.add_document(data_s)
+        
         # Load rules
         rules = load_rules()
         
-        # Format the prompt
-        prompt = format_prompt(data, rules)
+        # Format the prompt with similar transactions if any
+        prompt = format_prompt(data, rules, similar_transactions)
         
         # Get the score from LLaMAfile API
         score = score_data(prompt)
-        
-        # Print the score and any potential error
-        # print("Score:", score)
         
         return jsonify(json.loads(score))
     except Exception as e:
