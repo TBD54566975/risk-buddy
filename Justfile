@@ -7,3 +7,9 @@ download-models:
 # Command to run the development server, dependent on downloading the model
 dev: download-models
 	python main.py
+
+
+test:
+	python test-vectors.py
+
+	
