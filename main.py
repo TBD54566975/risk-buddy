@@ -15,6 +15,7 @@ RULES_DIR = './rules'
 LLAMAFILE_PORT = 9090
 LLAMAFILE_NAME = "llamafile"
 LLAMAFILE_MODEL = "phi-3-mini-128k-instruct.Q8_0.gguf"
+# LLAMAFILE_MODEL = "Meta-Llama-3-8B.Q4_0.gguf" - you can use other models but the prompt will need tuning in general. Phi3 is small and fast and large context.
 LLAMAFILE_PORT = 9090
 
 # Load rules from disk

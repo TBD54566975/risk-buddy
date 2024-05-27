@@ -123,6 +123,7 @@ curl -X POST http://localhost:8080/api/score -H "Content-Type: application/json"
 
 Currently have been looking at the `phi3` model from MSFT, which is ASF2 licensed, and quite good at reasoning yet small.
 The 128k variant is favoured as it can comprehend a realistic set of rules and data in one hit. Read more here: https://huggingface.co/microsoft/Phi-3-mini-128k-instruct
+You can also use models like Meta-Llama-3-8B.Q4_0.gguf, however the prompt will need adjusting. One future enhancement is to use a consensus of 3 disparate models (once prompts are tuned for each).
 
 ## Hosting models
 
