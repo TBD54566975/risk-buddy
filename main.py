@@ -116,7 +116,7 @@ def score():
         rules = load_rules()
         
         # Format the prompt with similar transactions if any
-        prompt = format_prompt(data, rules, similar_transactions)
+        prompt = format_prompt(data, rules, similar_transactions=None)
         
         # Get the score from LLaMAfile API
         score = score_data(prompt)
