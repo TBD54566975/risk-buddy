@@ -27,7 +27,7 @@ vectors = [
         "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDpkaHQ6czNtb3c1YWYxYTRpZTcxNW1ieHhqZW95dDRqbjFvaGdwejc1bW41Z2l6ajdjdXVidTZhbyMwIn0..KVK75zu4gZpZav1BzAqtea4WSu_J_jRUs7ZJx_ZpTAr3mtIaVPB1PUB8f6xnUmRbWXtKXBxgNCZQDAnx3VjpDw",
         "risk": {
             "expected-score": "low",
-            "expected-justification": "Minimal risk with small transaction amount and no suspicious patterns."
+            "expected-justification": "No risk, is known legitimate."
         }
     },
     {
