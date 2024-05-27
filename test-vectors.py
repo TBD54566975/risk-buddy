@@ -1109,7 +1109,7 @@ def run_tests():
     exact_matches = 0
     partial_matches = 0
 
-    for vector in vectors:
+    for i, vector in enumerate(vectors):
         expected_risk = vector.pop('risk', None)
         expected_score = expected_risk.get('expected-score')
         expected_justification = expected_risk.get('expected-justification')
@@ -1121,38 +1121,39 @@ def run_tests():
                 actual_score = result.get('score', 'N/A')
                 actual_justification = result.get('justification', 'N/A')
                 if expected_score == actual_score:
-                    match = True
+                    match = "Exact"
                     exact_matches += 1
                 elif is_partial_match(expected_score, actual_score):
                     match = "Partial"
                     partial_matches += 1
                 else:
-                    match = False
+                    match = "Wrong"
             else:
                 actual_score = "Error"
                 actual_justification = response.text
-                match = False
+                match = "Error"
         except Exception as e:
             actual_score = "Error"
             actual_justification = str(e)
-            match = False
+            match = "Error"
         
-        # Truncate expected justification to 40 characters
-        expected_justification = (expected_justification[:40] + '...') if len(expected_justification) > 40 else expected_justification
-        
-        results.append([expected_score, match, actual_score, expected_justification, actual_justification[:20]])
+        results.append({
+            "Test Vector": i + 1,
+            "Expected Score": expected_score,
+            "Match": match,
+            "Actual Score": actual_score,
+            "Expected Justification": expected_justification,
+            "Actual Justification": actual_justification
+        })
         
         # Print each result as it's processed
-        print(tabulate(
-            [[expected_score, match, actual_score, expected_justification, actual_justification[:20]]],
-            headers=["Expected Score", "Match", "Actual Score", "Expected Justification", "Actual Justification"],
-            tablefmt="grid"
-        ))
+        print(f"\nTest Vector {i + 1}")
+        print(f"Expected Score: {expected_score}")
+        print(f"Match: {match}")
+        print(f"Actual Score: {actual_score}")
+        print(f"Expected Justification: {expected_justification}")
+        print(f"Actual Justification: {actual_justification}\n")
         
-    # Print final results
-    df = pd.DataFrame(results, columns=["Expected Score", "Match", "Actual Score", "Expected Justification", "Actual Justification"])
-    print(tabulate(df, headers="keys", tablefmt="grid", showindex=False))
-
     # Summary
     correct_matches = exact_matches + partial_matches
     summary = f"Total Tests: {total_tests}, Exact Matches: {exact_matches}, Partial Matches: {partial_matches}, Correct Percentage: {correct_matches / total_tests * 100:.2f}%"
