@@ -1,6 +1,8 @@
 # Experimental risk scoring engine
 
-Looking at using SLMs/LLMs combined with rules in natural language to score risk (potentialy part of an ensemble approach for risk scoring). 
+Looking at using SLMs/LLMs combined with rules in natural language to score risk (potentialy part of an ensemble approach for risk scoring).
+Uses a local language model to evaluate rules against data, and builds embeddings on the fly to match with possibly similar transactions and entities to provide context.
+(No data leaves the server).
 
 ![image](https://github.com/TBD54566975/risky-buddy/assets/14976/3d5cb56c-f94a-466c-babb-f0c2fb8924b3)
 
