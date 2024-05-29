@@ -1,1 +1,0 @@
-If the transaction amount is greater than 100000, mark it as high risk.

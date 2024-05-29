@@ -3,24 +3,19 @@ import os
 import requests
 import json
 import subprocess
-import shlex
 import signal
 import time
-import embedding as embedding
+import embedding
 
 app = Flask(__name__)
 
-# Path to the directory containing the rule files
+# Constants
 RULES_DIR = './rules'
 LLAMAFILE_PORT = 9090
 LLAMAFILE_NAME = "llamafile"
-# You can use other models but the prompt will need tuning in general. Phi3 is small and fast and large context.
-#LLAMAFILE_MODEL = "phi-3-mini-128k-instruct.Q8_0.gguf"
-LLAMAFILE_MODEL = "Meta-Llama-3-8B.Q4_0.gguf" # from: https://huggingface.co/QuantFactory/Meta-Llama-3-8B-GGUF/blob/main/Meta-Llama-3-8B.Q4_0.gguf
-#LLAMAFILE_MODEL="llama-3-8b-instruct-262k.Q6_K.gguf" # from: https://huggingface.co/crusoeai/Llama-3-8B-Instruct-262k-GGUF/tree/main 
-LLAMAFILE_PORT = 9090
+LLAMAFILE_MODEL = "Meta-Llama-3-8B.Q8_0.gguf"
 
-# Load rules from disk
+# Utility functions
 def load_rules():
     rules = []
     for filename in os.listdir(RULES_DIR):
@@ -29,14 +24,33 @@ def load_rules():
                 rules.append(file.read().strip())
     return rules
 
-def format_prompt(data, rules, similar_transactions=None):
+def json_to_human_readable(data, indent=0):
+    human_readable = []
+    indent_str = '  ' * indent
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if "id" in key.lower() or "hash" in key.lower():
+                continue
+            if isinstance(value, (dict, list)):
+                human_readable.append(f"{indent_str}{key}:")
+                human_readable.append(json_to_human_readable(value, indent + 1))
+            else:
+                human_readable.append(f"{indent_str}{key}: {value}")
+    elif isinstance(data, list):
+        for item in data:
+            human_readable.append(json_to_human_readable(item, indent))
+    else:
+        human_readable.append(f"{indent_str}{data}")
+    return '\n'.join(human_readable)
+
+def format_evaluation_prompt(human_readable_data, rules, similar_transactions=None):
     rules_text = '\n'.join(rules)
     prompt = (
-        f"Take rules and transactional data and evaluate if any of the rules apply to the transaction, returning only JSON as instructed.\n"
+        f"Take the rules and transactional data described below and evaluate if any of the rules apply to the transaction, returning only JSON as instructed.\n"
         f"### Rules:\n"
         f"{rules_text}\n\n"
         f"### Transactional Data:\n"
-        f"{json.dumps(data, indent=2)}\n\n"
+        f"{human_readable_data}\n\n"
     )
 
     if similar_transactions:
@@ -56,26 +70,25 @@ def format_prompt(data, rules, similar_transactions=None):
         f"  \"score\": \"one of 'high', 'medium', or 'low'\",\n"
         f"  \"justification\": \"a brief explanation based on the rules and data as to why the score is this\"\n"
         f"}}\nResults:"
-
     )
     return prompt
 
-# Call the LLaMAfile API to score the data
-def score_data(prompt):
+def call_llm(prompt):
 
+    print("\n\n\n\n\n\n\nPROMPT\n\n\n\n" + prompt + "\n\n\n\n\n\n\nEND PROMPT\n\n\n\n\n")
 
     response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
         'prompt': prompt,
-        'n_predict': 150,  # Limit the response length
-        'temperature': 0.0,  # Adjust the randomness of the generated text
+        'n_predict': 150,
+        'temperature': 0.0,
+
     })
     response_data = response.json()
-    # Extract the JSON content from the response
     response_text = response_data['content'].strip()
+    print("LLM Response:", response_text)
+    return response_text
 
-    print("response_text", response_text)
-    #print("PROMPT", prompt)
-
+def extract_json_from_response(response_text):
     start = response_text.find('{')
     end = response_text.rfind('}') + 1
     if start != -1 and end != -1:
@@ -83,6 +96,14 @@ def score_data(prompt):
     else:
         json_response = '{}'
     return json_response
+
+def clean_json(json_string):
+    try:
+        cleaned_data = json.loads(json_string)
+        return json.dumps(cleaned_data, indent=2)
+    except json.JSONDecodeError as e:
+        print("JSON Decode Error:", e)
+        return json_string
 
 def run_llamafile():
     if not os.path.exists(LLAMAFILE_NAME):
@@ -103,26 +124,31 @@ def score():
     try:
         data = request.json.get('data')
         data_s = json.dumps(data)
-        # strip braces in the string
-
-        # Step 2: Find similar transactions with high similarity scores
+        
         similar_transactions = embedding.search(data_s, n_results=3, min_score=0.95)
         if similar_transactions:
             print("Nearby transaction(s) found.")            
         
-        # Add the current transaction to the embeddings
         embedding.add_document(data_s)
         
-        # Load rules
         rules = load_rules()
         
-        # Format the prompt with similar transactions if any
-        prompt = format_prompt(data, rules, similar_transactions=None)
+        # Convert JSON data to human-readable format
+        human_readable_data = json_to_human_readable(data)
+        print("Human-readable Data:\n", human_readable_data)
         
-        # Get the score from LLaMAfile API
-        score = score_data(prompt)
+        # Format the evaluation prompt
+        evaluation_prompt = format_evaluation_prompt(human_readable_data, rules, None)
+        score_response = call_llm(evaluation_prompt)
         
-        return jsonify(json.loads(score))
+        json_score = extract_json_from_response(score_response)
+        try:
+            cleaned_json_score = clean_json(json_score)
+            return jsonify(json.loads(cleaned_json_score))
+        except Exception as e:
+            print("Error processing JSON response:", score_response)
+            return jsonify({'error': str(e), 'response': score_response}), 500
+
     except Exception as e:
         error_message = str(e)
         print("Error:", error_message)
