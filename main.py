@@ -13,7 +13,7 @@ app = Flask(__name__)
 RULES_DIR = './rules'
 LLAMAFILE_PORT = 9090
 LLAMAFILE_NAME = "llamafile"
-LLAMAFILE_MODEL = "Meta-Llama-3-8B.Q4_0.gguf"
+LLAMAFILE_MODEL = "Meta-Llama-3-8B.Q8_0.gguf"
 
 # Utility functions
 def load_rules():
@@ -138,7 +138,7 @@ def score():
         print("Human-readable Data:\n", human_readable_data)
         
         # Format the evaluation prompt
-        evaluation_prompt = format_evaluation_prompt(human_readable_data, rules, similar_transactions)
+        evaluation_prompt = format_evaluation_prompt(human_readable_data, rules, None)
         score_response = call_llm(evaluation_prompt)
         
         json_score = extract_json_from_response(score_response)
