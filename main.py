@@ -14,8 +14,10 @@ app = Flask(__name__)
 RULES_DIR = './rules'
 LLAMAFILE_PORT = 9090
 LLAMAFILE_NAME = "llamafile"
-LLAMAFILE_MODEL = "phi-3-mini-128k-instruct.Q8_0.gguf"
-#LLAMAFILE_MODEL = "Meta-Llama-3-8B.Q4_0.gguf" # - you can use other models but the prompt will need tuning in general. Phi3 is small and fast and large context.
+# You can use other models but the prompt will need tuning in general. Phi3 is small and fast and large context.
+#LLAMAFILE_MODEL = "phi-3-mini-128k-instruct.Q8_0.gguf"
+LLAMAFILE_MODEL = "Meta-Llama-3-8B.Q4_0.gguf" # from: https://huggingface.co/QuantFactory/Meta-Llama-3-8B-GGUF/blob/main/Meta-Llama-3-8B.Q4_0.gguf
+#LLAMAFILE_MODEL="llama-3-8b-instruct-262k.Q6_K.gguf" # from: https://huggingface.co/crusoeai/Llama-3-8B-Instruct-262k-GGUF/tree/main 
 LLAMAFILE_PORT = 9090
 
 # Load rules from disk
@@ -53,7 +55,7 @@ def format_prompt(data, rules, similar_transactions=None):
         f"{{\n"
         f"  \"score\": \"one of 'high', 'medium', or 'low'\",\n"
         f"  \"justification\": \"a brief explanation based on the rules and data as to why the score is this\"\n"
-        f"}}\n"
+        f"}}\nResults:"
 
     )
     return prompt
@@ -72,7 +74,7 @@ def score_data(prompt):
     response_text = response_data['content'].strip()
 
     print("response_text", response_text)
-    print("PROMPT", prompt)
+    #print("PROMPT", prompt)
 
     start = response_text.find('{')
     end = response_text.rfind('}') + 1
@@ -106,8 +108,7 @@ def score():
         # Step 2: Find similar transactions with high similarity scores
         similar_transactions = embedding.search(data_s, n_results=3, min_score=0.95)
         if similar_transactions:
-            print("Nearby transaction(s) found:")
-            print(similar_transactions)
+            print("Nearby transaction(s) found.")            
         
         # Add the current transaction to the embeddings
         embedding.add_document(data_s)
