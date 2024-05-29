@@ -1,1 +1,1 @@
-If there is a mismatch between the transaction amount and the stated reason, mark it as medium risk.
+If there is a mismatch between the transaction amount and the stated reason, mark it as high risk.

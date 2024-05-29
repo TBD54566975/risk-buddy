@@ -3,7 +3,6 @@ import os
 import requests
 import json
 import subprocess
-import shlex
 import signal
 import time
 import embedding as embedding
@@ -20,21 +19,26 @@ LLAMAFILE_MODEL = "Meta-Llama-3-8B.Q4_0.gguf" # from: https://huggingface.co/Qua
 #LLAMAFILE_MODEL="llama-3-8b-instruct-262k.Q6_K.gguf" # from: https://huggingface.co/crusoeai/Llama-3-8B-Instruct-262k-GGUF/tree/main 
 LLAMAFILE_PORT = 9090
 
-# Load rules from disk
+
+
 def load_rules():
     rules = []
     for filename in os.listdir(RULES_DIR):
         if filename.endswith('.txt'):
             with open(os.path.join(RULES_DIR, filename), 'r') as file:
-                rules.append(file.read().strip())
+                rule = file.read().strip()
+                rules.append(rule)
+    print(f"Original Rules:\n{' '.join(rules)}\n")
     return rules
 
+# Global rules loaded at the start
+RULES = None
+
 def format_prompt(data, rules, similar_transactions=None):
-    rules_text = '\n'.join(rules)
     prompt = (
         f"Take rules and transactional data and evaluate if any of the rules apply to the transaction, returning only JSON as instructed.\n"
         f"### Rules:\n"
-        f"{rules_text}\n\n"
+        f"{rules}\n\n"
         f"### Transactional Data:\n"
         f"{json.dumps(data, indent=2)}\n\n"
     )
@@ -47,13 +51,13 @@ def format_prompt(data, rules, similar_transactions=None):
     prompt += (
         f"\n### Evaluation Notes (for internal use):\n"
         f"- Ensure that each rule is considered, but understand that not all rules may apply.\n"
-        f"- Highlight any transactions that meet the criteria of the rules.\n"
+        f"- justification must refer to a rule that was violated in some way.\n"
         f"- Provide a clear justification that references the specific rules that apply.\n"                    
-        f"- If any related transactions are present, consider them in evaluating rules that may apply.\n"                    
+        f"- If any related past transactions or exchanges are present, consider them in evaluating rules that may apply (but they are not being scored on their own).\n"                    
         f"### Task:\n"
         f"Based on the rules provided, evaluate the data and return the best judgement in JSON format. Not all rules may apply to the data, so only consider relevant rules. Detailed reasoning and processing isn't needed, but do consider each rule if it may apply:\n"
         f"{{\n"
-        f"  \"score\": \"one of 'high', 'medium', or 'low'\",\n"
+        f"  \"score\": \"one of 'high' or 'low'\",\n"
         f"  \"justification\": \"a brief explanation based on the rules and data as to why the score is this\"\n"
         f"}}\nResults:"
 
@@ -62,19 +66,15 @@ def format_prompt(data, rules, similar_transactions=None):
 
 # Call the LLaMAfile API to score the data
 def score_data(prompt):
-
-
     response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
         'prompt': prompt,
         'n_predict': 150,  # Limit the response length
         'temperature': 0.0,  # Adjust the randomness of the generated text
     })
     response_data = response.json()
-    # Extract the JSON content from the response
     response_text = response_data['content'].strip()
 
-    print("response_text", response_text)
-    #print("PROMPT", prompt)
+    print('response_text', response_text)
 
     start = response_text.find('{')
     end = response_text.rfind('}') + 1
@@ -82,7 +82,18 @@ def score_data(prompt):
         json_response = response_text[start:end]
     else:
         json_response = '{}'
-    return json_response
+    return json.loads(json_response)
+
+
+
+def check_llamafile_health():
+    try:
+        response = requests.get(f'http://localhost:{LLAMAFILE_PORT}/health')
+        health_status = response.json()
+        return health_status.get('status') == 'ok'
+    except Exception as e:
+        print(f"Health check failed: {e}")
+        return False
 
 def run_llamafile():
     if not os.path.exists(LLAMAFILE_NAME):
@@ -95,15 +106,24 @@ def run_llamafile():
                                          shell=True, 
                                          stdout=subprocess.PIPE, 
                                          stderr=subprocess.PIPE)
-    time.sleep(5)  # Wait for a few seconds to let the server start
-    return llamafile_process
+    
+    start_time = time.time()
+    timeout = 60  # Timeout after 60 seconds
+
+    while time.time() - start_time < timeout:
+        if check_llamafile_health():
+            print("LLaMAfile service is healthy.")
+            return llamafile_process
+        print("Waiting for LLaMAfile service to become healthy...")
+        time.sleep(5)
+
+    raise RuntimeError("LLaMAfile service failed to start within the timeout period.")
 
 @app.route('/api/score', methods=['POST'])
 def score():
     try:
         data = request.json.get('data')
         data_s = json.dumps(data)
-        # strip braces in the string
 
         # Step 2: Find similar transactions with high similarity scores
         similar_transactions = embedding.search(data_s, n_results=3, min_score=0.95)
@@ -113,16 +133,14 @@ def score():
         # Add the current transaction to the embeddings
         embedding.add_document(data_s)
         
-        # Load rules
-        rules = load_rules()
-        
         # Format the prompt with similar transactions if any
-        prompt = format_prompt(data, rules, similar_transactions=None)
+        prompt = format_prompt(data, RULES, similar_transactions)
         
         # Get the score from LLaMAfile API
-        score = score_data(prompt)
+        score_response = score_data(prompt)
         
-        return jsonify(json.loads(score))
+
+        return jsonify(score_response)
     except Exception as e:
         error_message = str(e)
         print("Error:", error_message)
@@ -131,6 +149,7 @@ def score():
 if __name__ == '__main__':
     llamafile_process = run_llamafile()
     try:
+        RULES = load_rules()
         app.run(port=8080)
     finally:
         llamafile_process.send_signal(signal.SIGINT)

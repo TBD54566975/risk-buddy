@@ -1,30 +1,50 @@
 vectors = [
     {
-        "metadata": {
-            "kind": "rfq",
-            "to": "did:dht:ho3axp5pgp4k8a7kqtb8knn5uaqwy9ghkm98wrytnh67bsn7ezry",
-            "from": "did:dht:s3mow5af1a4ie715mbxxjeoyt4jn1ohgpz75mn5gizj7cuubu6ao",
-            "id": "rfq_01hyr8v81hemcaeq10n3fm6qqz",
-            "exchangeId": "rfq_01hyr8v81hemcaeq10n3fm6qqz",
-            "createdAt": "2024-05-25T16:20:22.710212Z",
-            "protocol": "1.0"
+        "offering": {
+            "id": "offering_01hyr80tpyfznvykzgw72apveh",
+            "currencyPairs": [
+                {
+                    "pair": "BTC/MOMO",
+                    "payin": {
+                        "kind": "BTC_LEDGER",
+                        "amount": "2",
+                        "paymentDetails": {}
+                    },
+                    "payout": {
+                        "kind": "MOMO_MPESA",
+                        "paymentDetails": {}
+                    },
+                    "estimatedSettlementTime": 15
+                }
+            ]
         },
-        "data": {
-            "offeringId": "offering_01hyr80tpyfznvykzgw72apveh",
-            "payin": {
-                "amount": "2",
-                "kind": "BTC_LEDGER"
+        "rfq": {
+            "metadata": {
+                "kind": "rfq",
+                "to": "did:dht:ho3axp5pgp4k8a7kqtb8knn5uaqwy9ghkm98wrytnh67bsn7ezry",
+                "from": "did:dht:s3mow5af1a4ie715mbxxjeoyt4jn1ohgpz75mn5gizj7cuubu6ao",
+                "id": "rfq_01hyr8v81hemcaeq10n3fm6qqz",
+                "exchangeId": "rfq_01hyr8v81hemcaeq10n3fm6qqz",
+                "createdAt": "2024-05-25T16:20:22.710212Z",
+                "protocol": "1.0"
             },
-            "payout": {
-                "kind": "MOMO_MPESA"
+            "data": {
+                "offeringId": "offering_01hyr80tpyfznvykzgw72apveh",
+                "payin": {
+                    "amount": "2",
+                    "kind": "BTC_LEDGER"
+                },
+                "payout": {
+                    "kind": "MOMO_MPESA"
+                },
+                "claimsHash": "j_vWQ9-2AGf-ykDVQmjwFrXmRAVaDc748WVBkE-0-8Q"
             },
-            "claimsHash": "j_vWQ9-2AGf-ykDVQmjwFrXmRAVaDc748WVBkE-0-8Q"
+            "privateData": {
+                "salt": "KVad9SnO2sufTDnpAKh4sg",
+                "claims": []
+            },
+            "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDpkaHQ6czNtb3c1YWYxYTRpZTcxNW1ieHhqZW95dDRqbjFvaGdwejc1bW41Z2l6ajdjdXVidTZhbyMwIn0..KVK75zu4gZpZav1BzAqtea4WSu_J_jRUs7ZJx_ZpTAr3mtIaVPB1PUB8f6xnUmRbWXtKXBxgNCZQDAnx3VjpDw"
         },
-        "privateData": {
-            "salt": "KVad9SnO2sufTDnpAKh4sg",
-            "claims": []
-        },
-        "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDpkaHQ6czNtb3c1YWYxYTRpZTcxNW1ieHhqZW95dDRqbjFvaGdwejc1bW41Z2l6ajdjdXVidTZhbyMwIn0..KVK75zu4gZpZav1BzAqtea4WSu_J_jRUs7ZJx_ZpTAr3mtIaVPB1PUB8f6xnUmRbWXtKXBxgNCZQDAnx3VjpDw",
         "risk": {
             "expected-score": "low",
             "expected-justification": "No risk, is known legitimate."
@@ -35,14 +55,14 @@ vectors = [
             "id": "offering-40506",
             "currencyPairs": [
                 {
-                    "pair": "USD/BANK_RANDOM",
+                    "pair": "USD/BANK_ANZ",
                     "payin": {
                         "kind": "USD_LEDGER",
                         "amount": "80000.00",
                         "paymentDetails": {}
                     },
                     "payout": {
-                        "kind": "BANK_RANDOM",
+                        "kind": "BANK_ANZ",
                         "paymentDetails": {
                             "accountNumber": "0x9988776655",
                             "reason": "Large unexplained transfer"
@@ -65,10 +85,10 @@ vectors = [
                     "paymentDetails": {}
                 },
                 "payout": {
-                    "kind": "BANK_RANDOM",
+                    "kind": "BANK_ANZ",
                     "paymentDetails": {
                         "accountNumber": "0x9988776655",
-                        "reason": "Large unexplained transfer"
+                        "reason": "N/A"
                     }
                 },
                 "claims": ["signed-credential"]
@@ -102,14 +122,14 @@ vectors = [
             "id": "offering-30405",
             "currencyPairs": [
                 {
-                    "pair": "USD/BANK_RANDOM",
+                    "pair": "USD/BANK_ANZ",
                     "payin": {
                         "kind": "USD_CASH",
                         "amount": "100.00",
                         "paymentDetails": {}
                     },
                     "payout": {
-                        "kind": "BANK_RANDOM",
+                        "kind": "BANK_ANZ",
                         "paymentDetails": {
                             "accountNumber": "0x8899001122",
                             "reason": "Investment"
@@ -132,7 +152,7 @@ vectors = [
                     "paymentDetails": {}
                 },
                 "payout": {
-                    "kind": "BANK_RANDOM",
+                    "kind": "BANK_ANZ",
                     "paymentDetails": {
                         "accountNumber": "0x8899001122",
                         "reason": "Investment"
@@ -169,14 +189,14 @@ vectors = [
             "id": "offering-20304",
             "currencyPairs": [
                 {
-                    "pair": "USD/BANK_RANDOM",
+                    "pair": "USD/BANK_ANZ",
                     "payin": {
                         "kind": "USD_LEDGER",
                         "amount": "150.00",
                         "paymentDetails": {}
                     },
                     "payout": {
-                        "kind": "BANK_RANDOM",
+                        "kind": "BANK_ANZ",
                         "paymentDetails": {
                             "accountNumber": "0x6677889900",
                             "reason": "Personal expenses"
@@ -199,7 +219,7 @@ vectors = [
                     "paymentDetails": {}
                 },
                 "payout": {
-                    "kind": "BANK_RANDOM",
+                    "kind": "BANK_ANZ",
                     "paymentDetails": {
                         "accountNumber": "0x6677889900",
                         "reason": "Personal expenses"
@@ -241,7 +261,7 @@ vectors = [
                             "paymentDetails": {}
                         },
                         "payout": {
-                            "kind": "BANK_RANDOM",
+                            "kind": "BANK_ANZ",
                             "paymentDetails": {
                                 "accountNumber": "0x6677889900",
                                 "reason": "Personal expenses"
@@ -316,7 +336,7 @@ vectors = [
                             "paymentDetails": {}
                         },
                         "payout": {
-                            "kind": "BANK_RANDOM",
+                            "kind": "BANK_ANZ",
                             "paymentDetails": {
                                 "accountNumber": "0x6677889900",
                                 "reason": "Personal expenses"
@@ -379,8 +399,8 @@ vectors = [
             }
         ],
         "risk": {
-            "expected-score": "medium",
-            "expected-justification": "Medium risk due to high transaction volume in a short period."
+            "expected-score": "high",
+            "expected-justification": "High risk due to high transaction volume in a short period."
         }
     },
     {
@@ -388,18 +408,14 @@ vectors = [
             "id": "offering-10203",
             "currencyPairs": [
                 {
-                    "pair": "USD/BANK_RANDOM",
+                    "pair": "USD/BANK_ANZ",
                     "payin": {
                         "kind": "USD_LEDGER",
                         "amount": "3000.00",
                         "paymentDetails": {}
                     },
                     "payout": {
-                        "kind": "BANK_RANDOM",
-                        "paymentDetails": {
-                            "accountNumber": "0x4455667788",
-                            "reason": "Business payment"
-                        }
+                        "kind": "BANK_ANZ",
                     },
                     "estimatedSettlementTime": 30
                 }
@@ -418,10 +434,10 @@ vectors = [
                     "paymentDetails": {}
                 },
                 "payout": {
-                    "kind": "BANK_RANDOM",
+                    "kind": "BANK_ANZ",
                     "paymentDetails": {
                         "accountNumber": "0x4455667788",
-                        "reason": "Business payment"
+                        "reason": "Payment for major car servicing"
                     }
                 },
                 "claims": ["signed-credential"]
@@ -446,8 +462,8 @@ vectors = [
             }
         },
         "risk": {
-            "expected-score": "high",
-            "expected-justification": "High risk due to significant deviation from usual behavior."
+            "expected-score": "low",
+            "expected-justification": "low risk its a car service."
         }
     },
     {
@@ -455,14 +471,14 @@ vectors = [
             "id": "offering-78901",
             "currencyPairs": [
                 {
-                    "pair": "USD/BANK_RANDOM",
+                    "pair": "USD/BANK_ANZ",
                     "payin": {
                         "kind": "USD_LEDGER",
                         "amount": "500.00",
                         "paymentDetails": {}
                     },
                     "payout": {
-                        "kind": "BANK_RANDOM",
+                        "kind": "BANK_ANZ",
                         "paymentDetails": {
                             "accountNumber": "0x2233445566",
                             "reason": "Personal expenses"
@@ -485,7 +501,7 @@ vectors = [
                     "paymentDetails": {}
                 },
                 "payout": {
-                    "kind": "BANK_RANDOM",
+                    "kind": "BANK_ANZ",
                     "paymentDetails": {
                         "accountNumber": "0x2233445566",
                         "reason": "Personal expenses"
@@ -522,14 +538,14 @@ vectors = [
             "id": "offering-46802",
             "currencyPairs": [
                 {
-                    "pair": "USD/BANK_RANDOM",
+                    "pair": "USD/BANK_ANZ",
                     "payin": {
                         "kind": "USD_LEDGER",
                         "amount": "300.00",
                         "paymentDetails": {}
                     },
                     "payout": {
-                        "kind": "BANK_RANDOM",
+                        "kind": "BANK_ANZ",
                         "paymentDetails": {
                             "accountNumber": "0x6677889900",
                             "reason": "Business payment"
@@ -552,7 +568,7 @@ vectors = [
                     "paymentDetails": {}
                 },
                 "payout": {
-                    "kind": "BANK_RANDOM",
+                    "kind": "BANK_ANZ",
                     "paymentDetails": {
                         "accountNumber": "0x6677889900",
                         "reason": "Business payment"
@@ -594,7 +610,7 @@ vectors = [
                             "paymentDetails": {}
                         },
                         "payout": {
-                            "kind": "BANK_RANDOM",
+                            "kind": "BANK_ANZ",
                             "paymentDetails": {
                                 "accountNumber": "0x6677889900",
                                 "reason": "Business payment"
@@ -669,7 +685,7 @@ vectors = [
                             "paymentDetails": {}
                         },
                         "payout": {
-                            "kind": "BANK_RANDOM",
+                            "kind": "BANK_ANZ",
                             "paymentDetails": {
                                 "accountNumber": "0x6677889900",
                                 "reason": "Refund request"
@@ -732,8 +748,8 @@ vectors = [
             }
         ],
         "risk": {
-            "expected-score": "medium",
-            "expected-justification": "Medium risk due to frequent refund requests."
+            "expected-score": "high",
+            "expected-justification": "Risk due to frequent refund requests."
         }
     },
     {
@@ -741,14 +757,14 @@ vectors = [
             "id": "offering-35791",
             "currencyPairs": [
                 {
-                    "pair": "USD/BANK_RANDOM",
+                    "pair": "USD/BANK_ANZ",
                     "payin": {
                         "kind": "USD_CASH",
                         "amount": "150.00",
                         "paymentDetails": {}
                     },
                     "payout": {
-                        "kind": "BANK_RANDOM",
+                        "kind": "BANK_ANZ",
                         "paymentDetails": {
                             "accountNumber": "0x5544332211",
                             "reason": "Business payment"
@@ -771,7 +787,7 @@ vectors = [
                     "paymentDetails": {}
                 },
                 "payout": {
-                    "kind": "BANK_RANDOM",
+                    "kind": "BANK_ANZ",
                     "paymentDetails": {
                         "accountNumber": "0x5544332211",
                         "reason": "Business payment"
@@ -813,7 +829,7 @@ vectors = [
                             "paymentDetails": {}
                         },
                         "payout": {
-                            "kind": "BANK_RANDOM",
+                            "kind": "BANK_ANZ",
                             "paymentDetails": {
                                 "accountNumber": "0x5544332211",
                                 "reason": "Business payment"
@@ -888,7 +904,7 @@ vectors = [
                             "paymentDetails": {}
                         },
                         "payout": {
-                            "kind": "BANK_RANDOM",
+                            "kind": "BANK_ANZ",
                             "paymentDetails": {
                                 "accountNumber": "0x5544332211",
                                 "reason": "Business payment"
@@ -960,14 +976,14 @@ vectors = [
             "id": "offering-67890",
             "currencyPairs": [
                 {
-                    "pair": "USD/BANK_RANDOM",
+                    "pair": "USD/BANK_ANZ",
                     "payin": {
                         "kind": "USD_LEDGER",
                         "amount": "5000.00",
                         "paymentDetails": {}
                     },
                     "payout": {
-                        "kind": "BANK_RANDOM",
+                        "kind": "BANK_ANZ",
                         "paymentDetails": {
                             "accountNumber": "0x0987654321",
                             "reason": "Gift"
@@ -990,10 +1006,10 @@ vectors = [
                     "paymentDetails": {}
                 },
                 "payout": {
-                    "kind": "BANK_RANDOM",
+                    "kind": "BANK_ANZ",
                     "paymentDetails": {
                         "accountNumber": "0x0987654321",
-                        "reason": "Gift"
+                        "reason": "Paying for lunch"
                     }
                 },
                 "claims": ["signed-credential"]
@@ -1018,8 +1034,8 @@ vectors = [
             }
         },
         "risk": {
-            "expected-score": "medium",
-            "expected-justification": "Medium risk due to mismatch in amount and reason."
+            "expected-score": "high",
+            "expected-justification": "high risk due to mismatch in amount and reason."
         }
     },
     {
@@ -1027,14 +1043,14 @@ vectors = [
             "id": "offering-12345",
             "currencyPairs": [
                 {
-                    "pair": "USD/BANK_RANDOM",
+                    "pair": "USD/BANK_ANZ",
                     "payin": {
                         "kind": "USD_LEDGER",
                         "amount": "105000.00",
                         "paymentDetails": {}
                     },
                     "payout": {
-                        "kind": "BANK_RANDOM",
+                        "kind": "BANK_ANZ",
                         "paymentDetails": {
                             "accountNumber": "0x1234567890",
                             "reason": "Investment"
@@ -1057,7 +1073,7 @@ vectors = [
                     "paymentDetails": {}
                 },
                 "payout": {
-                    "kind": "BANK_RANDOM",
+                    "kind": "BANK_ANZ",
                     "paymentDetails": {
                         "accountNumber": "0x1234567890",
                         "reason": "Investment"
