@@ -74,7 +74,7 @@ def score_data(prompt):
     response_text = response_data['content'].strip()
 
     print("response_text", response_text)
-    print("PROMPT", prompt)
+    #print("PROMPT", prompt)
 
     start = response_text.find('{')
     end = response_text.rfind('}') + 1
@@ -108,8 +108,7 @@ def score():
         # Step 2: Find similar transactions with high similarity scores
         similar_transactions = embedding.search(data_s, n_results=3, min_score=0.95)
         if similar_transactions:
-            print("Nearby transaction(s) found:")
-            print(similar_transactions)
+            print("Nearby transaction(s) found.")            
         
         # Add the current transaction to the embeddings
         embedding.add_document(data_s)
