@@ -12,7 +12,7 @@ vectors = [
         "data": {
             "offeringId": "offering_01hyr80tpyfznvykzgw72apveh",
             "payin": {
-                "amount": "2",
+                "amount": "0.00000002",
                 "kind": "BTC_LEDGER"
             },
             "payout": {
