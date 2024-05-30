@@ -13,7 +13,8 @@ app = Flask(__name__)
 RULES_DIR = './rules'
 LLAMAFILE_PORT = 9090
 LLAMAFILE_NAME = "llamafile"
-LLAMAFILE_MODEL = "Meta-Llama-3-8B.Q8_0.gguf"
+#LLAMAFILE_MODEL = "Meta-Llama-3-8B.Q8_0.gguf"
+LLAMAFILE_MODEL = "Phi-3-medium-128k-instruct-Q5_K_M.gguf"
 
 # Utility functions
 def load_rules():
@@ -43,45 +44,36 @@ def json_to_human_readable(data, indent=0):
         human_readable.append(f"{indent_str}{data}")
     return '\n'.join(human_readable)
 
-def format_evaluation_prompt(human_readable_data, rules, similar_transactions=None):
+def format_evaluation_prompt(human_readable_data, rules):
     rules_text = '\n'.join(rules)
     prompt = (
-        f"Take the rules and transactional data described below and evaluate if any of the rules apply to the transaction, returning only JSON as instructed.\n"
-        f"### Rules:\n"
-        f"{rules_text}\n\n"
-        f"### Transactional Data:\n"
-        f"{human_readable_data}\n\n"
+        f"Evaluate the following transactional data based on the provided rules and determine the risk level (high, medium, or low). Do not provide a justification at this stage.\n\n"
+        f"### Rules:\n{rules_text}\n\n"
+        f"### Transactional Data:\n{human_readable_data}\n\n"
+        f"### Task:\nBased on the rules provided, evaluate the data and return the risk level as a single string: 'high', 'medium', or 'low'."
     )
+    return prompt
 
-    if similar_transactions:
-        prompt += "### Possibly Related Transactions:\n\n"
-        for trans, score in similar_transactions:
-            prompt += f"{trans}\n\n"
-
-    prompt += (
-        f"\n### Evaluation Notes (for internal use):\n"
-        f"- Ensure that each rule is considered, but understand that not all rules may apply.\n"
-        f"- Highlight any transactions that meet the criteria of the rules.\n"
-        f"- Provide a clear justification that references the specific rules that apply.\n"                    
-        f"- If any related transactions are present, consider them in evaluating rules that may apply.\n"                    
-        f"### Task:\n"
-        f"Based on the rules provided, evaluate the data and return the best judgement in JSON format. Not all rules may apply to the data, so only consider relevant rules. Detailed reasoning and processing isn't needed, but do consider each rule if it may apply:\n"
-        f"{{\n"
-        f"  \"score\": \"one of 'high', 'medium', or 'low'\",\n"
-        f"  \"justification\": \"a brief explanation based on the rules and data as to why the score is this\"\n"
-        f"}}\nResults:"
+def format_justification_prompt(human_readable_data, rules, risk_level):
+    rules_text = '\n'.join(rules)
+    prompt = (
+        f"The following transaction has been flagged as '{risk_level}' risk. Please provide a justification for this risk level based on the rules provided.\n\n"
+        f"### Rules:\n{rules_text}\n\n"
+        f"### Transactional Data:\n{human_readable_data}\n\n"
+        f"### Task:\nProvide a brief explanation as to why the transaction is considered '{risk_level}' risk based on the rules and data."
     )
     return prompt
 
 def call_llm(prompt):
-
     print("\n\n\n\n\n\n\nPROMPT\n\n\n\n" + prompt + "\n\n\n\n\n\n\nEND PROMPT\n\n\n\n\n")
 
     response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
         'prompt': prompt,
-        'n_predict': 150,
+        'n_predict': 100,
         'temperature': 0.0,
-
+        'top_p': 0.9,
+        'min_p': 0.4,
+        'top_k': 50,
     })
     response_data = response.json()
     response_text = response_data['content'].strip()
@@ -137,18 +129,26 @@ def score():
         human_readable_data = json_to_human_readable(data)
         print("Human-readable Data:\n", human_readable_data)
         
-        # Format the evaluation prompt
-        evaluation_prompt = format_evaluation_prompt(human_readable_data, rules, None)
-        score_response = call_llm(evaluation_prompt)
+        # Step 1: Determine the risk level
+        evaluation_prompt = format_evaluation_prompt(human_readable_data, rules)
+        risk_response = call_llm(evaluation_prompt).strip()
         
-        json_score = extract_json_from_response(score_response)
-        try:
-            cleaned_json_score = clean_json(json_score)
-            return jsonify(json.loads(cleaned_json_score))
-        except Exception as e:
-            print("Error processing JSON response:", score_response)
-            return jsonify({'error': str(e), 'response': score_response}), 500
-
+        if risk_response in ["high", "medium"]:
+            # Step 2: Request justification for flagged transactions
+            justification_prompt = format_justification_prompt(human_readable_data, rules, risk_response)
+            justification_response = call_llm(justification_prompt).strip()
+            result = {
+                "score": risk_response,
+                "justification": justification_response
+            }
+        else:
+            result = {
+                "score": "low",
+                "justification": "None needed for low risk transactions."
+            }
+        
+        return jsonify(result)
+        
     except Exception as e:
         error_message = str(e)
         print("Error:", error_message)
