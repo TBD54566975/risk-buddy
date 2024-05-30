@@ -13,7 +13,6 @@ app = Flask(__name__)
 RULES_DIR = './rules'
 LLAMAFILE_PORT = 9090
 LLAMAFILE_NAME = "llamafile"
-#LLAMAFILE_MODEL = "Meta-Llama-3-8B.Q8_0.gguf"
 LLAMAFILE_MODEL = "Phi-3-medium-128k-instruct-Q5_K_M.gguf"
 
 # Utility functions
@@ -44,28 +43,25 @@ def json_to_human_readable(data, indent=0):
         human_readable.append(f"{indent_str}{data}")
     return '\n'.join(human_readable)
 
-def format_evaluation_prompt(human_readable_data, rules):
-    rules_text = '\n'.join(rules)
-    prompt = (
-        f"Evaluate the following transactional data based on the provided rules and determine the risk level (high, medium, or low). Do not provide a justification at this stage.\n\n"
-        f"### Rules:\n{rules_text}\n\n"
-        f"### Transactional Data:\n{human_readable_data}\n\n"
-        f"### Task:\nBased on the rules provided, evaluate the data and return the risk level as a single string: 'high', 'medium', or 'low'."
+def call_llm_for_evaluation(human_readable_data, rules):
+    rules_text = '\n'.join([f"Rule {i+1}: {rule}" for i, rule in enumerate(rules)])
+    system_prompt = (
+        "Transcript of a never-ending dialog, where the User interacts with an Assistant. "
+        "The Assistant is a risk evaluating agent looking for risks according to the provided rules. "
+        "The Assistant is helpful, kind, honest, good at writing, and never fails to answer the User's requests immediately and with precision."
     )
-    return prompt
-
-def format_justification_prompt(human_readable_data, rules, risk_level):
-    rules_text = '\n'.join(rules)
     prompt = (
-        f"The following transaction has been flagged as '{risk_level}' risk. Please provide a justification for this risk level based on the rules provided.\n\n"
-        f"### Rules:\n{rules_text}\n\n"
-        f"### Transactional Data:\n{human_readable_data}\n\n"
-        f"### Task:\nProvide a brief explanation as to why the transaction is considered '{risk_level}' risk based on the rules and data."
+        f"{system_prompt}\n\n"
+        f"User: Evaluate the following transactional data based on the provided rules and determine the risk level. "
+        f"Return only the risk level as a single word: 'high' or 'low'.\n\n"
+        f"Rules:\n{rules_text}\n\n"
+        f"Example:\n"
+        f"User: Here is a transaction with an amount of 0.0001 BTC.\n"
+        f"Assistant: low\n\n"
+        f"Transactional Data:\n{human_readable_data}\n\n"
+        f"User: Based on the rules provided, evaluate the data and return the risk level as a single word: 'high' or 'low'.\n"
+        f"Assistant:"
     )
-    return prompt
-
-def call_llm(prompt):
-    print("\n\n\n\n\n\n\nPROMPT\n\n\n\n" + prompt + "\n\n\n\n\n\n\nEND PROMPT\n\n\n\n\n")
 
     response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
         'prompt': prompt,
@@ -76,18 +72,34 @@ def call_llm(prompt):
         'top_k': 50,
     })
     response_data = response.json()
-    response_text = response_data['content'].strip()
-    print("LLM Response:", response_text)
-    return response_text
+    response_text = response_data['content'].strip().lower()
+    print("risk level response:", response_text)
+    if response_text in ["high", "low"]:
+        return response_text
+    return "low"  # Default to low if response is not clear
 
-def extract_json_from_response(response_text):
-    start = response_text.find('{')
-    end = response_text.rfind('}') + 1
-    if start != -1 and end != -1:
-        json_response = response_text[start:end]
-    else:
-        json_response = '{}'
-    return json_response
+def call_llm_for_justification(human_readable_data, rules, risk_level):
+    rules_text = '\n'.join([f"Rule {i+1}: {rule}" for i, rule in enumerate(rules)])
+    prompt = (
+        f"User: The following transaction has been flagged as '{risk_level}' risk. Provide a brief justification for this risk level based on the rules provided. "
+        f"Ensure to include the word '{risk_level}' in your justification.\n\n"
+        f"Rules:\n{rules_text}\n\n"
+        f"Transactional Data:\n{human_readable_data}\n\n"
+        f"Assistant: Provide a brief explanation as to why the transaction is considered '{risk_level}' risk based on the rules and data."
+    )
+
+    response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
+        'prompt': prompt,
+        'n_predict': 50,
+        'temperature': 0.0,
+        'top_p': 0.9,
+        'min_p': 0.4,
+        'top_k': 50,
+    })
+    response_data = response.json()
+    response_text = response_data['content'].strip().lower()
+    print("justification response:", response_text)
+    return response_text
 
 def clean_json(json_string):
     try:
@@ -117,26 +129,19 @@ def score():
         data = request.json.get('data')
         data_s = json.dumps(data)
         
-        similar_transactions = embedding.search(data_s, n_results=3, min_score=0.95)
-        if similar_transactions:
-            print("Nearby transaction(s) found.")            
-        
         embedding.add_document(data_s)
         
         rules = load_rules()
         
         # Convert JSON data to human-readable format
         human_readable_data = json_to_human_readable(data)
-        print("Human-readable Data:\n", human_readable_data)
         
         # Step 1: Determine the risk level
-        evaluation_prompt = format_evaluation_prompt(human_readable_data, rules)
-        risk_response = call_llm(evaluation_prompt).strip()
+        risk_response = call_llm_for_evaluation(human_readable_data, rules).strip().lower()
         
-        if risk_response in ["high", "medium"]:
+        if risk_response == "high":
             # Step 2: Request justification for flagged transactions
-            justification_prompt = format_justification_prompt(human_readable_data, rules, risk_response)
-            justification_response = call_llm(justification_prompt).strip()
+            justification_response = call_llm_for_justification(human_readable_data, rules, risk_response).strip().lower()
             result = {
                 "score": risk_response,
                 "justification": justification_response
