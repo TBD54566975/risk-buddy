@@ -13,7 +13,7 @@ app = Flask(__name__)
 RULES_DIR = './rules'
 LLAMAFILE_PORT = 9090
 LLAMAFILE_NAME = "llamafile"
-LLAMAFILE_MODEL = "Phi-3-medium-128k-instruct-Q5_K_M.gguf"
+LLAMAFILE_MODEL = "phi-3-medium-128k-instruct-Q5_K_M.gguf"
 
 # Utility functions
 def load_rules():
@@ -65,14 +65,15 @@ def call_llm_for_evaluation(human_readable_data, rules):
 
     response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
         'prompt': prompt,
-        'n_predict': 100,
+        'n_predict': 10,
         'temperature': 0.0,
         'top_p': 0.9,
         'min_p': 0.4,
         'top_k': 50,
+        'stop': ["User:", "Assistant:"]
     })
     response_data = response.json()
-    response_text = response_data['content'].strip().lower()
+    response_text = response_data['content'].strip().split('\n')[0].lower()
     print("risk level response:", response_text)
     if response_text in ["high", "low"]:
         return response_text
@@ -95,6 +96,7 @@ def call_llm_for_justification(human_readable_data, rules, risk_level):
         'top_p': 0.9,
         'min_p': 0.4,
         'top_k': 50,
+        'stop': ["User:", "Assistant:"]
     })
     response_data = response.json()
     response_text = response_data['content'].strip().lower()
