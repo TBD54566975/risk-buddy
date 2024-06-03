@@ -6,6 +6,7 @@ import subprocess
 import signal
 import time
 import embedding
+from tbdex import TBDEX_PROTOCOL_DESCRIPTION, TBDEX_JARGON
 
 app = Flask(__name__)
 
@@ -46,14 +47,16 @@ def json_to_human_readable(data, indent=0):
 def call_llm_for_evaluation(human_readable_data, rules):
     rules_text = '\n'.join([f"Rule {i+1}: {rule}" for i, rule in enumerate(rules)])
     system_prompt = (
-        "Transcript of a never-ending dialog, where the User interacts with an Assistant. "
+        "Transcript of a never-ending dialog, where the User interacts with an Assistant reviewing remittance related data.. "
         "The Assistant is a risk evaluating agent looking for risks according to the provided rules. "
-        "The Assistant is helpful, kind, honest, good at writing, and never fails to answer the User's requests immediately and with precision."
+        "The Assistant is helpful, honest, good at writing, and never fails to answer the User's requests immediately and with precision."
     )
     prompt = (
         f"{system_prompt}\n\n"
         f"User: Evaluate the following transactional data based on the provided rules and determine the risk level. "
         f"Return only the risk level as a single word: 'high' or 'low'.\n\n"
+        f"tbDEX Protocol Description:\n{TBDEX_PROTOCOL_DESCRIPTION}\n\n"
+        f"And some explanations of jargon:\n{TBDEX_JARGON}\n\n"
         f"Rules:\n{rules_text}\n\n"
         f"Example:\n"
         f"User: Here is a transaction with an amount of 0.0001 BTC.\n"
@@ -75,8 +78,10 @@ def call_llm_for_evaluation(human_readable_data, rules):
     response_data = response.json()
     response_text = response_data['content'].strip().split('\n')[0].lower()
     print("risk level response:", response_text)
-    if response_text in ["high", "low"]:
-        return response_text
+    if any(word in response_text for word in ["high", "low"]):
+        # Extract the first instance of 'high' or 'low'
+        risk_level = next((word for word in ["high", "low"] if word in response_text), "low")
+        return risk_level
     return "low"  # Default to low if response is not clear
 
 def call_llm_for_justification(human_readable_data, rules, risk_level):
@@ -84,6 +89,8 @@ def call_llm_for_justification(human_readable_data, rules, risk_level):
     prompt = (
         f"User: The following transaction has been flagged as '{risk_level}' risk. Provide a brief justification for this risk level based on the rules provided. "
         f"Ensure to include the word '{risk_level}' in your justification.\n\n"
+        f"tbDEX Protocol Description:\n{TBDEX_PROTOCOL_DESCRIPTION}\n\n"
+        f"And some explanations of jargon:\n{TBDEX_JARGON}\n\n"
         f"Rules:\n{rules_text}\n\n"
         f"Transactional Data:\n{human_readable_data}\n\n"
         f"Assistant: Provide a brief explanation as to why the transaction is considered '{risk_level}' risk based on the rules and data."
