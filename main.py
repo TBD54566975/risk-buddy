@@ -47,10 +47,24 @@ def json_to_human_readable(data, indent=0):
 def call_llm_for_evaluation(human_readable_data, rules):
     rules_text = '\n'.join([f"Rule {i+1}: {rule}" for i, rule in enumerate(rules)])
     system_prompt = (
-        "Transcript of a never-ending dialog, where the User interacts with an Assistant reviewing remittance related data.. "
+        "Transcript of a never-ending dialog, where the User interacts with an Assistant reviewing remittance related data. "
         "The Assistant is a risk evaluating agent looking for risks according to the provided rules. "
         "The Assistant is helpful, honest, good at writing, and never fails to answer the User's requests immediately and with precision."
     )
+    
+    n_shot_examples = (
+        "User: Here is a transaction with an amount of 0.0001 BTC.\n"
+        "Assistant: low\n\n"
+        "User: Here is a transaction with an amount of 10,000 USD to an unknown account.\n"
+        "Assistant: high\n\n"
+        "User: Here is a transaction with an amount of 500 USD from a well-known merchant.\n"
+        "Assistant: low\n\n"
+        "User: Here is a transaction with an amount of 50,000 USD with no stated reason.\n"
+        "Assistant: high\n\n"
+        "User: Here is a transaction with an amount of 200 USD from USD to MOMO.\n"
+        "Assistant: low\n"
+    )
+    
     prompt = (
         f"{system_prompt}\n\n"
         f"User: Evaluate the following transactional data based on the provided rules and determine the risk level. "
@@ -59,10 +73,10 @@ def call_llm_for_evaluation(human_readable_data, rules):
         f"And some explanations of jargon:\n{TBDEX_JARGON}\n\n"
         f"Rules:\n{rules_text}\n\n"
         f"Example:\n"
-        f"User: Here is a transaction with an amount of 0.0001 BTC.\n"
-        f"Assistant: low\n\n"
+        f"{n_shot_examples}\n"
         f"Transactional Data:\n{human_readable_data}\n\n"
         f"User: Based on the rules provided, evaluate the data and return the risk level as a single word: 'high' or 'low'.\n"
+        f"Ensure your evaluation strictly adheres to the given rules without creating new ones.\n"
         f"Assistant:"
     )
 
@@ -86,13 +100,25 @@ def call_llm_for_evaluation(human_readable_data, rules):
 
 def call_llm_for_justification(human_readable_data, rules, risk_level):
     rules_text = '\n'.join([f"Rule {i+1}: {rule}" for i, rule in enumerate(rules)])
+    
+    # Adding more specific chain-of-thought guidance
+    chain_of_thought = (
+        "Let's analyze the data step-by-step to determine the justification:\n"
+        "1. Identify which rules apply to this transaction.\n"
+        "2. Check if the transaction data matches the conditions in those rules.\n"
+        "3. Provide a justification based on the applicable rules and transaction data.\n"
+        "4. Ensure the justification mentions the specific rules and why they apply without introducing any new rules."
+    )
+    
     prompt = (
         f"User: The following transaction has been flagged as '{risk_level}' risk. Provide a brief justification for this risk level based on the rules provided. "
-        f"Ensure to include the word '{risk_level}' in your justification.\n\n"
+        f"Ensure to include the word '{risk_level}' in your justification and only refer to the given rules without creating new ones. "
+        f"Each rule you reference must be explicitly quoted as given in the list of rules.\n\n"
         f"tbDEX Protocol Description:\n{TBDEX_PROTOCOL_DESCRIPTION}\n\n"
         f"And some explanations of jargon:\n{TBDEX_JARGON}\n\n"
         f"Rules:\n{rules_text}\n\n"
         f"Transactional Data:\n{human_readable_data}\n\n"
+        f"{chain_of_thought}\n\n"
         f"Assistant: Provide a brief explanation as to why the transaction is considered '{risk_level}' risk based on the rules and data."
     )
 
@@ -168,7 +194,7 @@ def score():
         print("Error:", error_message)
         return jsonify({'error': error_message}), 500
 
-if __name__ == '__main__':
+if __name__:
     llamafile_process = run_llamafile()
     try:
         app.run(port=8080)

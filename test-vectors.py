@@ -875,6 +875,7 @@ vectors = [
                 }
             },
             {
+                "accountAge": "1 week",
                 "rfq": {
                     "metadata": {
                         "from": "did:example:user-4004",
