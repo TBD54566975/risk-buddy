@@ -1,51 +1,20 @@
 vectors = [
     {
-        "metadata": {
-            "kind": "rfq",
-            "to": "did:dht:ho3axp5pgp4k8a7kqtb8knn5uaqwy9ghkm98wrytnh67bsn7ezry",
-            "from": "did:dht:s3mow5af1a4ie715mbxxjeoyt4jn1ohgpz75mn5gizj7cuubu6ao",
-            "id": "rfq_01hyr8v81hemcaeq10n3fm6qqz",
-            "exchangeId": "rfq_01hyr8v81hemcaeq10n3fm6qqz",
-            "createdAt": "2024-05-25T16:20:22.710212Z",
-            "protocol": "1.0"
-        },
-        "data": {
-            "offeringId": "offering_01hyr80tpyfznvykzgw72apveh",
-            "payin": {
-                "amount": "0.00000002",
-                "kind": "BTC_LEDGER"
-            },
-            "payout": {
-                "kind": "MOMO_MPESA"
-            },
-            "claimsHash": "j_vWQ9-2AGf-ykDVQmjwFrXmRAVaDc748WVBkE-0-8Q"
-        },
-        "privateData": {
-            "salt": "KVad9SnO2sufTDnpAKh4sg",
-            "claims": []
-        },
-        "signature": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDpkaHQ6czNtb3c1YWYxYTRpZTcxNW1ieHhqZW95dDRqbjFvaGdwejc1bW41Z2l6ajdjdXVidTZhbyMwIn0..KVK75zu4gZpZav1BzAqtea4WSu_J_jRUs7ZJx_ZpTAr3mtIaVPB1PUB8f6xnUmRbWXtKXBxgNCZQDAnx3VjpDw",
-        "risk": {
-            "expected-score": "low",
-            "expected-justification": "No risk, is known legitimate."
-        }
-    },
-    {
         "offering": {
-            "id": "offering-40506",
+            "id": "offering-40510",
             "currencyPairs": [
                 {
                     "pair": "USD/BANK_RANDOM",
                     "payin": {
                         "kind": "USD_LEDGER",
-                        "amount": "80000.00",
+                        "amount": "45000.00",
                         "paymentDetails": {}
                     },
                     "payout": {
                         "kind": "BANK_RANDOM",
                         "paymentDetails": {
-                            "accountNumber": "0x9988776655",
-                            "reason": "Large unexplained transfer"
+                            "accountNumber": "0x3344556677",
+                            "reason": "For services rendered"
                         }
                     },
                     "estimatedSettlementTime": 20
@@ -54,21 +23,21 @@ vectors = [
         },
         "rfq": {
             "metadata": {
-                "from": "did:example:user-10010",
-                "to": "did:example:pfi-10010"
+                "from": "did:example:user-10014",
+                "to": "did:example:pfi-10014"
             },
             "data": {
-                "offeringId": "offering-40506",
+                "offeringId": "offering-40510",
                 "payin": {
                     "kind": "USD_LEDGER",
-                    "amount": "80000.00",
+                    "amount": "45000.00",
                     "paymentDetails": {}
                 },
                 "payout": {
                     "kind": "BANK_RANDOM",
                     "paymentDetails": {
-                        "accountNumber": "0x9988776655",
-                        "reason": "Large unexplained transfer"
+                        "accountNumber": "0x3344556677",
+                        "reason": "Large unexpected transfer"
                     }
                 },
                 "claims": ["signed-credential"]
@@ -76,968 +45,87 @@ vectors = [
         },
         "quote": {
             "metadata": {
-                "from": "did:example:pfi-10010",
-                "to": "did:example:user-10010",
-                "exchangeId": "exchange-40506"
+                "from": "did:example:pfi-10014",
+                "to": "did:example:user-10014",
+                "exchangeId": "exchange-40510"
             },
             "data": {
-                "expiresAt": "2024-06-01T14:00:00Z",
+                "expiresAt": "2024-06-04T14:00:00Z",
                 "payin": {
                     "currencyCode": "USD",
-                    "amount": "80000.00"
+                    "amount": "45000.00"
                 },
                 "payout": {
                     "currencyCode": "USD",
-                    "amount": "79500.00"
+                    "amount": "44500.00"
                 }
             }
         },
         "risk": {
             "expected-score": "high",
-            "expected-justification": "High risk due to large unexplained transfer."
-        }
-    },
-    {
-        "offering": {
-            "id": "offering-30405",
-            "currencyPairs": [
-                {
-                    "pair": "USD/BANK_RANDOM",
-                    "payin": {
-                        "kind": "USD_CASH",
-                        "amount": "100.00",
-                        "paymentDetails": {}
-                    },
-                    "payout": {
-                        "kind": "BANK_RANDOM",
-                        "paymentDetails": {
-                            "accountNumber": "0x8899001122",
-                            "reason": "Investment"
-                        }
-                    },
-                    "estimatedSettlementTime": 15
-                }
-            ]
+            "expected-justification": "5. High risk due to significant deviation from the customer's usual transaction pattern."
         },
-        "rfq": {
-            "metadata": {
-                "from": "did:example:user-9009",
-                "to": "did:example:pfi-9009"
-            },
-            "data": {
-                "offeringId": "offering-30405",
-                "payin": {
-                    "kind": "USD_CASH",
-                    "amount": "100.00",
-                    "paymentDetails": {}
-                },
-                "payout": {
-                    "kind": "BANK_RANDOM",
-                    "paymentDetails": {
-                        "accountNumber": "0x8899001122",
-                        "reason": "Investment"
-                    }
-                },
-                "claims": ["signed-credential"]
-            }
-        },
-        "quote": {
-            "metadata": {
-                "from": "did:example:pfi-9009",
-                "to": "did:example:user-9009",
-                "exchangeId": "exchange-30405"
-            },
-            "data": {
-                "expiresAt": "2024-06-01T14:00:00Z",
-                "payin": {
-                    "currencyCode": "USD",
-                    "amount": "100.00"
-                },
-                "payout": {
-                    "currencyCode": "USD",
-                    "amount": "99.00"
-                }
-            }
-        },
-        "risk": {
-            "expected-score": "high",
-            "expected-justification": "High risk due to withheld information."
-        }
-    },
-    {
-        "offering": {
-            "id": "offering-20304",
-            "currencyPairs": [
-                {
-                    "pair": "USD/BANK_RANDOM",
-                    "payin": {
-                        "kind": "USD_LEDGER",
-                        "amount": "150.00",
-                        "paymentDetails": {}
-                    },
-                    "payout": {
-                        "kind": "BANK_RANDOM",
-                        "paymentDetails": {
-                            "accountNumber": "0x6677889900",
-                            "reason": "Personal expenses"
-                        }
-                    },
-                    "estimatedSettlementTime": 20
-                }
-            ]
-        },
-        "rfq": {
-            "metadata": {
-                "from": "did:example:user-8008",
-                "to": "did:example:pfi-8008"
-            },
-            "data": {
-                "offeringId": "offering-20304",
-                "payin": {
-                    "kind": "USD_LEDGER",
+        "history": [
+            {
+                "timestamp": "2023-06-10T14:22:11Z",
+                "details": {
                     "amount": "150.00",
-                    "paymentDetails": {}
-                },
-                "payout": {
-                    "kind": "BANK_RANDOM",
-                    "paymentDetails": {
-                        "accountNumber": "0x6677889900",
-                        "reason": "Personal expenses"
-                    }
-                },
-                "claims": ["signed-credential"]
-            }
-        },
-        "quote": {
-            "metadata": {
-                "from": "did:example:pfi-8008",
-                "to": "did:example:user-8008",
-                "exchangeId": "exchange-20304"
-            },
-            "data": {
-                "expiresAt": "2024-06-01T14:00:00Z",
-                "payin": {
-                    "currencyCode": "USD",
-                    "amount": "150.00"
-                },
-                "payout": {
-                    "currencyCode": "USD",
-                    "amount": "148.50"
-                }
-            }
-        },
-        "pastExchanges": [
-            {
-                "rfq": {
-                    "metadata": {
-                        "from": "did:example:user-8008",
-                        "to": "did:example:pfi-8008"
-                    },
-                    "data": {
-                        "offeringId": "offering-20304",
-                        "payin": {
-                            "kind": "USD_LEDGER",
-                            "amount": "200.00",
-                            "paymentDetails": {}
-                        },
-                        "payout": {
-                            "kind": "BANK_RANDOM",
-                            "paymentDetails": {
-                                "accountNumber": "0x6677889900",
-                                "reason": "Personal expenses"
-                            }
-                        },
-                        "claims": ["signed-credential"]
-                    }
-                },
-                "quote": {
-                    "metadata": {
-                        "from": "did:example:pfi-8008",
-                        "to": "did:example:user-8008",
-                        "exchangeId": "exchange-20305"
-                    },
-                    "data": {
-                        "expiresAt": "2024-05-01T14:00:00Z",
-                        "payin": {
-                            "currencyCode": "USD",
-                            "amount": "200.00"
-                        },
-                        "payout": {
-                            "currencyCode": "USD",
-                            "amount": "198.00"
-                        }
-                    }
-                },
-                "orderStatus": [
-                    {
-                        "metadata": {
-                            "from": "did:example:pfi-8008",
-                            "to": "did:example:user-8008",
-                            "exchangeId": "exchange-20305"
-                        },
-                        "data": {
-                            "orderStatus": "PROCESSING"
-                        }
-                    },
-                    {
-                        "metadata": {
-                            "from": "did:example:pfi-8008",
-                            "to": "did:example:user-8008",
-                            "exchangeId": "exchange-20305"
-                        },
-                        "data": {
-                            "orderStatus": "COMPLETED"
-                        }
-                    }
-                ],
-                "close": {
-                    "metadata": {
-                        "from": "did:example:pfi-8008",
-                        "to": "did:example:user-8008",
-                        "exchangeId": "exchange-20305"
-                    },
-                    "data": {
-                        "reason": "Order fulfilled",
-                        "success": "true"
-                    }
+                    "reason": "Monthly subscription fee"
                 }
             },
             {
-                "rfq": {
-                    "metadata": {
-                        "from": "did:example:user-8008",
-                        "to": "did:example:pfi-8008"
-                    },
-                    "data": {
-                        "offeringId": "offering-20304",
-                        "payin": {
-                            "kind": "USD_LEDGER",
-                            "amount": "300.00",
-                            "paymentDetails": {}
-                        },
-                        "payout": {
-                            "kind": "BANK_RANDOM",
-                            "paymentDetails": {
-                                "accountNumber": "0x6677889900",
-                                "reason": "Personal expenses"
-                            }
-                        },
-                        "claims": ["signed-credential"]
-                    }
-                },
-                "quote": {
-                    "metadata": {
-                        "from": "did:example:pfi-8008",
-                        "to": "did:example:user-8008",
-                        "exchangeId": "exchange-20306"
-                    },
-                    "data": {
-                        "expiresAt": "2024-05-10T14:00:00Z",
-                        "payin": {
-                            "currencyCode": "USD",
-                            "amount": "300.00"
-                        },
-                        "payout": {
-                            "currencyCode": "USD",
-                            "amount": "297.00"
-                        }
-                    }
-                },
-                "orderStatus": [
-                    {
-                        "metadata": {
-                            "from": "did:example:pfi-8008",
-                            "to": "did:example:user-8008",
-                            "exchangeId": "exchange-20306"
-                        },
-                        "data": {
-                            "orderStatus": "PROCESSING"
-                        }
-                    },
-                    {
-                        "metadata": {
-                            "from": "did:example:pfi-8008",
-                            "to": "did:example:user-8008",
-                            "exchangeId": "exchange-20306"
-                        },
-                        "data": {
-                            "orderStatus": "COMPLETED"
-                        }
-                    }
-                ],
-                "close": {
-                    "metadata": {
-                        "from": "did:example:pfi-8008",
-                        "to": "did:example:user-8008",
-                        "exchangeId": "exchange-20306"
-                    },
-                    "data": {
-                        "reason": "Order fulfilled",
-                        "success": "true"
-                    }
+                "timestamp": "2023-07-15T11:34:22Z",
+                "details": {
+                    "amount": "250.00",
+                    "reason": "Payment for services rendered"
                 }
-            }
-        ],
-        "risk": {
-            "expected-score": "medium",
-            "expected-justification": "Medium risk due to high transaction volume in a short period."
-        }
-    },
-    {
-        "offering": {
-            "id": "offering-10203",
-            "currencyPairs": [
-                {
-                    "pair": "USD/BANK_RANDOM",
-                    "payin": {
-                        "kind": "USD_LEDGER",
-                        "amount": "3000.00",
-                        "paymentDetails": {}
-                    },
-                    "payout": {
-                        "kind": "BANK_RANDOM",
-                        "paymentDetails": {
-                            "accountNumber": "0x4455667788",
-                            "reason": "Business payment"
-                        }
-                    },
-                    "estimatedSettlementTime": 30
-                }
-            ]
-        },
-        "rfq": {
-            "metadata": {
-                "from": "did:example:user-7007",
-                "to": "did:example:pfi-7007"
             },
-            "data": {
-                "offeringId": "offering-10203",
-                "payin": {
-                    "kind": "USD_LEDGER",
-                    "amount": "3000.00",
-                    "paymentDetails": {}
-                },
-                "payout": {
-                    "kind": "BANK_RANDOM",
-                    "paymentDetails": {
-                        "accountNumber": "0x4455667788",
-                        "reason": "Business payment"
-                    }
-                },
-                "claims": ["signed-credential"]
-            }
-        },
-        "quote": {
-            "metadata": {
-                "from": "did:example:pfi-7007",
-                "to": "did:example:user-7007",
-                "exchangeId": "exchange-10203"
-            },
-            "data": {
-                "expiresAt": "2024-06-01T14:00:00Z",
-                "payin": {
-                    "currencyCode": "USD",
-                    "amount": "3000.00"
-                },
-                "payout": {
-                    "currencyCode": "USD",
-                    "amount": "2970.00"
-                }
-            }
-        },
-        "risk": {
-            "expected-score": "high",
-            "expected-justification": "High risk due to significant deviation from usual behavior."
-        }
-    },
-    {
-        "offering": {
-            "id": "offering-78901",
-            "currencyPairs": [
-                {
-                    "pair": "USD/BANK_RANDOM",
-                    "payin": {
-                        "kind": "USD_LEDGER",
-                        "amount": "500.00",
-                        "paymentDetails": {}
-                    },
-                    "payout": {
-                        "kind": "BANK_RANDOM",
-                        "paymentDetails": {
-                            "accountNumber": "0x2233445566",
-                            "reason": "Personal expenses"
-                        }
-                    },
-                    "estimatedSettlementTime": 25
-                }
-            ]
-        },
-        "rfq": {
-            "metadata": {
-                "from": "did:example:user-6006",
-                "to": "did:example:pfi-6006"
-            },
-            "data": {
-                "offeringId": "offering-78901",
-                "payin": {
-                    "kind": "USD_LEDGER",
-                    "amount": "500.00",
-                    "paymentDetails": {}
-                },
-                "payout": {
-                    "kind": "BANK_RANDOM",
-                    "paymentDetails": {
-                        "accountNumber": "0x2233445566",
-                        "reason": "Personal expenses"
-                    }
-                },
-                "claims": ["signed-credential"]
-            }
-        },
-        "quote": {
-            "metadata": {
-                "from": "did:example:pfi-6006",
-                "to": "did:example:user-6006",
-                "exchangeId": "exchange-78901"
-            },
-            "data": {
-                "expiresAt": "2024-06-01T14:00:00Z",
-                "payin": {
-                    "currencyCode": "USD",
-                    "amount": "500.00"
-                },
-                "payout": {
-                    "currencyCode": "USD",
-                    "amount": "495.00"
-                }
-            }
-        },
-        "risk": {
-            "expected-score": "low",
-            "expected-justification": "No risk detected."
-        }
-    },
-    {
-        "offering": {
-            "id": "offering-46802",
-            "currencyPairs": [
-                {
-                    "pair": "USD/BANK_RANDOM",
-                    "payin": {
-                        "kind": "USD_LEDGER",
-                        "amount": "300.00",
-                        "paymentDetails": {}
-                    },
-                    "payout": {
-                        "kind": "BANK_RANDOM",
-                        "paymentDetails": {
-                            "accountNumber": "0x6677889900",
-                            "reason": "Business payment"
-                        }
-                    },
-                    "estimatedSettlementTime": 20
-                }
-            ]
-        },
-        "rfq": {
-            "metadata": {
-                "from": "did:example:user-5005",
-                "to": "did:example:pfi-5005"
-            },
-            "data": {
-                "offeringId": "offering-46802",
-                "payin": {
-                    "kind": "USD_LEDGER",
+            {
+                "timestamp": "2023-08-20T09:44:33Z",
+                "details": {
                     "amount": "300.00",
-                    "paymentDetails": {}
-                },
-                "payout": {
-                    "kind": "BANK_RANDOM",
-                    "paymentDetails": {
-                        "accountNumber": "0x6677889900",
-                        "reason": "Business payment"
-                    }
-                },
-                "claims": ["signed-credential"]
-            }
-        },
-        "quote": {
-            "metadata": {
-                "from": "did:example:pfi-5005",
-                "to": "did:example:user-5005",
-                "exchangeId": "exchange-46802"
-            },
-            "data": {
-                "expiresAt": "2024-06-01T14:00:00Z",
-                "payin": {
-                    "currencyCode": "USD",
-                    "amount": "300.00"
-                },
-                "payout": {
-                    "currencyCode": "USD",
-                    "amount": "297.00"
-                }
-            }
-        },
-        "pastExchanges": [
-            {
-                "rfq": {
-                    "metadata": {
-                        "from": "did:example:user-5005",
-                        "to": "did:example:pfi-5005"
-                    },
-                    "data": {
-                        "offeringId": "offering-46802",
-                        "payin": {
-                            "kind": "USD_LEDGER",
-                            "amount": "300.00",
-                            "paymentDetails": {}
-                        },
-                        "payout": {
-                            "kind": "BANK_RANDOM",
-                            "paymentDetails": {
-                                "accountNumber": "0x6677889900",
-                                "reason": "Business payment"
-                            }
-                        },
-                        "claims": ["signed-credential"]
-                    }
-                },
-                "quote": {
-                    "metadata": {
-                        "from": "did:example:pfi-5005",
-                        "to": "did:example:user-5005",
-                        "exchangeId": "exchange-46803"
-                    },
-                    "data": {
-                        "expiresAt": "2024-05-01T14:00:00Z",
-                        "payin": {
-                            "currencyCode": "USD",
-                            "amount": "300.00"
-                        },
-                        "payout": {
-                            "currencyCode": "USD",
-                            "amount": "297.00"
-                        }
-                    }
-                },
-                "orderStatus": [
-                    {
-                        "metadata": {
-                            "from": "did:example:pfi-5005",
-                            "to": "did:example:user-5005",
-                            "exchangeId": "exchange-46803"
-                        },
-                        "data": {
-                            "orderStatus": "PROCESSING"
-                        }
-                    },
-                    {
-                        "metadata": {
-                            "from": "did:example:pfi-5005",
-                            "to": "did:example:user-5005",
-                            "exchangeId": "exchange-46803"
-                        },
-                        "data": {
-                            "orderStatus": "COMPLETED"
-                        }
-                    }
-                ],
-                "close": {
-                    "metadata": {
-                        "from": "did:example:pfi-5005",
-                        "to": "did:example:user-5005",
-                        "exchangeId": "exchange-46803"
-                    },
-                    "data": {
-                        "reason": "Order fulfilled",
-                        "success": "true"
-                    }
+                    "reason": "Donation to charity"
                 }
             },
             {
-                "rfq": {
-                    "metadata": {
-                        "from": "did:example:user-5005",
-                        "to": "did:example:pfi-5005"
-                    },
-                    "data": {
-                        "offeringId": "offering-46802",
-                        "payin": {
-                            "kind": "USD_LEDGER",
-                            "amount": "300.00",
-                            "paymentDetails": {}
-                        },
-                        "payout": {
-                            "kind": "BANK_RANDOM",
-                            "paymentDetails": {
-                                "accountNumber": "0x6677889900",
-                                "reason": "Refund request"
-                            }
-                        },
-                        "claims": ["signed-credential"]
-                    }
-                },
-                "quote": {
-                    "metadata": {
-                        "from": "did:example:pfi-5005",
-                        "to": "did:example:user-5005",
-                        "exchangeId": "exchange-46804"
-                    },
-                    "data": {
-                        "expiresAt": "2024-05-10T14:00:00Z",
-                        "payin": {
-                            "currencyCode": "USD",
-                            "amount": "300.00"
-                        },
-                        "payout": {
-                            "currencyCode": "USD",
-                            "amount": "297.00"
-                        }
-                    }
-                },
-                "orderStatus": [
-                    {
-                        "metadata": {
-                            "from": "did:example:pfi-5005",
-                            "to": "did:example:user-5005",
-                            "exchangeId": "exchange-46804"
-                        },
-                        "data": {
-                            "orderStatus": "PROCESSING"
-                        }
-                    },
-                    {
-                        "metadata": {
-                            "from": "did:example:pfi-5005",
-                            "to": "did:example:user-5005",
-                            "exchangeId": "exchange-46804"
-                        },
-                        "data": {
-                            "orderStatus": "COMPLETED"
-                        }
-                    }
-                ],
-                "close": {
-                    "metadata": {
-                        "from": "did:example:pfi-5005",
-                        "to": "did:example:user-5005",
-                        "exchangeId": "exchange-46804"
-                    },
-                    "data": {
-                        "reason": "Order fulfilled",
-                        "success": "true"
-                    }
+                "timestamp": "2023-09-25T17:56:44Z",
+                "details": {
+                    "amount": "200.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2023-10-30T10:12:55Z",
+                "details": {
+                    "amount": "250.00",
+                    "reason": "Monthly subscription fee"
+                }
+            },
+            {
+                "timestamp": "2024-05-30T12:34:56Z",
+                "details": {
+                    "amount": "45000.00",
+                    "reason": "Large unexpected transfer"
                 }
             }
-        ],
-        "risk": {
-            "expected-score": "medium",
-            "expected-justification": "Medium risk due to frequent refund requests."
-        }
+        ]
     },
     {
         "offering": {
-            "id": "offering-35791",
-            "currencyPairs": [
-                {
-                    "pair": "USD/BANK_RANDOM",
-                    "payin": {
-                        "kind": "USD_CASH",
-                        "amount": "150.00",
-                        "paymentDetails": {}
-                    },
-                    "payout": {
-                        "kind": "BANK_RANDOM",
-                        "paymentDetails": {
-                            "accountNumber": "0x5544332211",
-                            "reason": "Business payment"
-                        }
-                    },
-                    "estimatedSettlementTime": 30
-                }
-            ]
-        },
-        "rfq": {
-            "metadata": {
-                "from": "did:example:user-4004",
-                "to": "did:example:pfi-4004"
-            },
-            "data": {
-                "offeringId": "offering-35791",
-                "payin": {
-                    "kind": "USD_CASH",
-                    "amount": "150.00",
-                    "paymentDetails": {}
-                },
-                "payout": {
-                    "kind": "BANK_RANDOM",
-                    "paymentDetails": {
-                        "accountNumber": "0x5544332211",
-                        "reason": "Business payment"
-                    }
-                },
-                "claims": ["signed-credential"]
-            }
-        },
-        "quote": {
-            "metadata": {
-                "from": "did:example:pfi-4004",
-                "to": "did:example:user-4004",
-                "exchangeId": "exchange-35791"
-            },
-            "data": {
-                "expiresAt": "2024-06-01T14:00:00Z",
-                "payin": {
-                    "currencyCode": "USD",
-                    "amount": "150.00"
-                },
-                "payout": {
-                    "currencyCode": "USD",
-                    "amount": "148.50"
-                }
-            }
-        },
-        "pastExchanges": [
-            {
-                "rfq": {
-                    "metadata": {
-                        "from": "did:example:user-4004",
-                        "to": "did:example:pfi-4004"
-                    },
-                    "data": {
-                        "offeringId": "offering-35791",
-                        "payin": {
-                            "kind": "USD_CASH",
-                            "amount": "200.00",
-                            "paymentDetails": {}
-                        },
-                        "payout": {
-                            "kind": "BANK_RANDOM",
-                            "paymentDetails": {
-                                "accountNumber": "0x5544332211",
-                                "reason": "Business payment"
-                            }
-                        },
-                        "claims": ["signed-credential"]
-                    }
-                },
-                "quote": {
-                    "metadata": {
-                        "from": "did:example:pfi-4004",
-                        "to": "did:example:user-4004",
-                        "exchangeId": "exchange-35792"
-                    },
-                    "data": {
-                        "expiresAt": "2024-05-10T14:00:00Z",
-                        "payin": {
-                            "currencyCode": "USD",
-                            "amount": "200.00"
-                        },
-                        "payout": {
-                            "currencyCode": "USD",
-                            "amount": "198.00"
-                        }
-                    }
-                },
-                "orderStatus": [
-                    {
-                        "metadata": {
-                            "from": "did:example:pfi-4004",
-                            "to": "did:example:user-4004",
-                            "exchangeId": "exchange-35792"
-                        },
-                        "data": {
-                            "orderStatus": "PROCESSING"
-                        }
-                    },
-                    {
-                        "metadata": {
-                            "from": "did:example:pfi-4004",
-                            "to": "did:example:user-4004",
-                            "exchangeId": "exchange-35792"
-                        },
-                        "data": {
-                            "orderStatus": "COMPLETED"
-                        }
-                    }
-                ],
-                "close": {
-                    "metadata": {
-                        "from": "did:example:pfi-4004",
-                        "to": "did:example:user-4004",
-                        "exchangeId": "exchange-35792"
-                    },
-                    "data": {
-                        "reason": "Order fulfilled",
-                        "success": "true"
-                    }
-                }
-            },
-            {
-                "rfq": {
-                    "metadata": {
-                        "from": "did:example:user-4004",
-                        "to": "did:example:pfi-4004"
-                    },
-                    "data": {
-                        "offeringId": "offering-35791",
-                        "payin": {
-                            "kind": "USD_CASH",
-                            "amount": "300.00",
-                            "paymentDetails": {}
-                        },
-                        "payout": {
-                            "kind": "BANK_RANDOM",
-                            "paymentDetails": {
-                                "accountNumber": "0x5544332211",
-                                "reason": "Business payment"
-                            }
-                        },
-                        "claims": ["signed-credential"]
-                    }
-                },
-                "quote": {
-                    "metadata": {
-                        "from": "did:example:pfi-4004",
-                        "to": "did:example:user-4004",
-                        "exchangeId": "exchange-35793"
-                    },
-                    "data": {
-                        "expiresAt": "2024-05-20T14:00:00Z",
-                        "payin": {
-                            "currencyCode": "USD",
-                            "amount": "300.00"
-                        },
-                        "payout": {
-                            "currencyCode": "USD",
-                            "amount": "297.00"
-                        }
-                    }
-                },
-                "orderStatus": [
-                    {
-                        "metadata": {
-                            "from": "did:example:pfi-4004",
-                            "to": "did:example:user-4004",
-                            "exchangeId": "exchange-35793"
-                        },
-                        "data": {
-                            "orderStatus": "PROCESSING"
-                        }
-                    },
-                    {
-                        "metadata": {
-                            "from": "did:example:pfi-4004",
-                            "to": "did:example:user-4004",
-                            "exchangeId": "exchange-35793"
-                        },
-                        "data": {
-                            "orderStatus": "COMPLETED"
-                        }
-                    }
-                ],
-                "close": {
-                    "metadata": {
-                        "from": "did:example:pfi-4004",
-                        "to": "did:example:user-4004",
-                        "exchangeId": "exchange-35793"
-                    },
-                    "data": {
-                        "reason": "Order fulfilled",
-                        "success": "true"
-                    }
-                }
-            }
-        ],
-        "risk": {
-            "expected-score": "high",
-            "expected-justification": "High risk due to account age and high transaction volume."
-        }
-    },
-    {
-        "offering": {
-            "id": "offering-67890",
+            "id": "offering-40511",
             "currencyPairs": [
                 {
                     "pair": "USD/BANK_RANDOM",
                     "payin": {
                         "kind": "USD_LEDGER",
-                        "amount": "5000.00",
+                        "amount": "200.00",
                         "paymentDetails": {}
                     },
                     "payout": {
                         "kind": "BANK_RANDOM",
                         "paymentDetails": {
-                            "accountNumber": "0x0987654321",
-                            "reason": "Gift"
-                        }
-                    },
-                    "estimatedSettlementTime": 15
-                }
-            ]
-        },
-        "rfq": {
-            "metadata": {
-                "from": "did:example:user-2002",
-                "to": "did:example:pfi-2002"
-            },
-            "data": {
-                "offeringId": "offering-67890",
-                "payin": {
-                    "kind": "USD_LEDGER",
-                    "amount": "5000.00",
-                    "paymentDetails": {}
-                },
-                "payout": {
-                    "kind": "BANK_RANDOM",
-                    "paymentDetails": {
-                        "accountNumber": "0x0987654321",
-                        "reason": "Gift"
-                    }
-                },
-                "claims": ["signed-credential"]
-            }
-        },
-        "quote": {
-            "metadata": {
-                "from": "did:example:pfi-2002",
-                "to": "did:example:user-2002",
-                "exchangeId": "exchange-67890"
-            },
-            "data": {
-                "expiresAt": "2024-06-01T14:00:00Z",
-                "payin": {
-                    "currencyCode": "USD",
-                    "amount": "5000.00"
-                },
-                "payout": {
-                    "currencyCode": "USD",
-                    "amount": "4950.00"
-                }
-            }
-        },
-        "risk": {
-            "expected-score": "medium",
-            "expected-justification": "Medium risk due to mismatch in amount and reason."
-        }
-    },
-    {
-        "offering": {
-            "id": "offering-12345",
-            "currencyPairs": [
-                {
-                    "pair": "USD/BANK_RANDOM",
-                    "payin": {
-                        "kind": "USD_LEDGER",
-                        "amount": "105000.00",
-                        "paymentDetails": {}
-                    },
-                    "payout": {
-                        "kind": "BANK_RANDOM",
-                        "paymentDetails": {
-                            "accountNumber": "0x1234567890",
-                            "reason": "Investment"
+                            "accountNumber": "0x5566778899",
+                            "reason": "Payment for services rendered"
                         }
                     },
                     "estimatedSettlementTime": 20
@@ -1046,21 +134,21 @@ vectors = [
         },
         "rfq": {
             "metadata": {
-                "from": "did:example:user-1001",
-                "to": "did:example:pfi-1001"
+                "from": "did:example:user-10015",
+                "to": "did:example:pfi-10015"
             },
             "data": {
-                "offeringId": "offering-12345",
+                "offeringId": "offering-40511",
                 "payin": {
                     "kind": "USD_LEDGER",
-                    "amount": "105000.00",
+                    "amount": "200.00",
                     "paymentDetails": {}
                 },
                 "payout": {
                     "kind": "BANK_RANDOM",
                     "paymentDetails": {
-                        "accountNumber": "0x1234567890",
-                        "reason": "Investment"
+                        "accountNumber": "0x5566778899",
+                        "reason": "Payment for services rendered"
                     }
                 },
                 "claims": ["signed-credential"]
@@ -1068,26 +156,181 @@ vectors = [
         },
         "quote": {
             "metadata": {
-                "from": "did:example:pfi-1001",
-                "to": "did:example:user-1001",
-                "exchangeId": "exchange-12345"
+                "from": "did:example:pfi-10015",
+                "to": "did:example:user-10015",
+                "exchangeId": "exchange-40511"
             },
             "data": {
-                "expiresAt": "2024-06-01T14:00:00Z",
+                "expiresAt": "2024-06-04T14:00:00Z",
                 "payin": {
                     "currencyCode": "USD",
-                    "amount": "105000.00"
+                    "amount": "200.00"
                 },
                 "payout": {
                     "currencyCode": "USD",
-                    "amount": "104500.00"
+                    "amount": "195.00"
                 }
             }
         },
         "risk": {
-            "expected-score": "high",
-            "expected-justification": "High risk due to withheld information and large amount."
-        }
+            "expected-score": "low",
+            "expected-justification": "6. Low risk due to consistent transaction pattern with usual behavior."
+        },
+        "history": [
+            {
+                "timestamp": "2023-06-10T14:22:11Z",
+                "details": {
+                    "amount": "150.00",
+                    "reason": "Monthly subscription fee"
+                }
+            },
+            {
+                "timestamp": "2023-07-15T11:34:22Z",
+                "details": {
+                    "amount": "250.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2023-08-20T09:44:33Z",
+                "details": {
+                    "amount": "200.00",
+                    "reason": "Donation to charity"
+                }
+            },
+            {
+                "timestamp": "2023-09-25T17:56:44Z",
+                "details": {
+                    "amount": "200.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2023-10-30T10:12:55Z",
+                "details": {
+                    "amount": "250.00",
+                    "reason": "Monthly subscription fee"
+                }
+            },
+            {
+                "timestamp": "2023-11-30T10:12:55Z",
+                "details": {
+                    "amount": "150.00",
+                    "reason": "Donation to charity"
+                }
+            }
+        ]
+    },
+    {
+        "offering": {
+            "id": "offering-40512",
+            "currencyPairs": [
+                {
+                    "pair": "USD/BANK_RANDOM",
+                    "payin": {
+                        "kind": "USD_LEDGER",
+                        "amount": "150.00",
+                        "paymentDetails": {}
+                    },
+                    "payout": {
+                        "kind": "BANK_RANDOM",
+                        "paymentDetails": {
+                            "accountNumber": "0x1122334455",
+                            "reason": "Monthly subscription fee"
+                        }
+                    },
+                    "estimatedSettlementTime": 20
+                }
+            ]
+        },
+        "rfq": {
+            "metadata": {
+                "from": "did:example:user-10016",
+                "to": "did:example:pfi-10016"
+            },
+            "data": {
+                "offeringId": "offering-40512",
+                "payin": {
+                    "kind": "USD_LEDGER",
+                    "amount": "150.00",
+                    "paymentDetails": {}
+                },
+                "payout": {
+                    "kind": "BANK_RANDOM",
+                    "paymentDetails": {
+                        "accountNumber": "0x1122334455",
+                        "reason": "Monthly subscription fee"
+                    }
+                },
+                "claims": ["signed-credential"]
+            }
+        },
+        "quote": {
+            "metadata": {
+                "from": "did:example:pfi-10016",
+                "to": "did:example:user-10016",
+                "exchangeId": "exchange-40512"
+            },
+            "data": {
+                "expiresAt": "2024-06-04T14:00:00Z",
+                "payin": {
+                    "currencyCode": "USD",
+                    "amount": "150.00"
+                },
+                "payout": {
+                    "currencyCode": "USD",
+                    "amount": "145.00"
+                }
+            }
+        },
+        "risk": {
+            "expected-score": "low",
+            "expected-justification": "7. Low risk due to consistent transaction pattern with usual behavior."
+        },
+        "history": [
+            {
+                "timestamp": "2023-06-10T14:22:11Z",
+                "details": {
+                    "amount": "150.00",
+                    "reason": "Monthly subscription fee"
+                }
+            },
+            {
+                "timestamp": "2023-07-15T11:34:22Z",
+                "details": {
+                    "amount": "250.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2023-08-20T09:44:33Z",
+                "details": {
+                    "amount": "200.00",
+                    "reason": "Donation to charity"
+                }
+            },
+            {
+                "timestamp": "2023-09-25T17:56:44Z",
+                "details": {
+                    "amount": "200.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2023-10-30T10:12:55Z",
+                "details": {
+                    "amount": "250.00",
+                    "reason": "Monthly subscription fee"
+                }
+            },
+            {
+                "timestamp": "2023-11-30T10:12:55Z",
+                "details": {
+                    "amount": "150.00",
+                    "reason": "Donation to charity"
+                }
+            }
+        ]
     }
 ]
 

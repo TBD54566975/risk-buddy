@@ -1,1 +1,2 @@
 If the transaction has withheld information or seems intentionally vague, mark it as high risk.
+There should be a reason for each transaction (RFQ) which is clear. 
