@@ -1,5 +1,4 @@
 vectors = [
-
     {
         "offering": {
             "id": "offering-40510",
@@ -111,9 +110,228 @@ vectors = [
             }
         ]
     },
-
-    
-
+    {
+        "offering": {
+            "id": "offering-40511",
+            "currencyPairs": [
+                {
+                    "pair": "USD/BANK_RANDOM",
+                    "payin": {
+                        "kind": "USD_LEDGER",
+                        "amount": "200.00",
+                        "paymentDetails": {}
+                    },
+                    "payout": {
+                        "kind": "BANK_RANDOM",
+                        "paymentDetails": {
+                            "accountNumber": "0x5566778899",
+                            "reason": "Payment for services rendered"
+                        }
+                    },
+                    "estimatedSettlementTime": 20
+                }
+            ]
+        },
+        "rfq": {
+            "metadata": {
+                "from": "did:example:user-10015",
+                "to": "did:example:pfi-10015"
+            },
+            "data": {
+                "offeringId": "offering-40511",
+                "payin": {
+                    "kind": "USD_LEDGER",
+                    "amount": "200.00",
+                    "paymentDetails": {}
+                },
+                "payout": {
+                    "kind": "BANK_RANDOM",
+                    "paymentDetails": {
+                        "accountNumber": "0x5566778899",
+                        "reason": "Payment for services rendered"
+                    }
+                },
+                "claims": ["signed-credential"]
+            }
+        },
+        "quote": {
+            "metadata": {
+                "from": "did:example:pfi-10015",
+                "to": "did:example:user-10015",
+                "exchangeId": "exchange-40511"
+            },
+            "data": {
+                "expiresAt": "2024-06-04T14:00:00Z",
+                "payin": {
+                    "currencyCode": "USD",
+                    "amount": "200.00"
+                },
+                "payout": {
+                    "currencyCode": "USD",
+                    "amount": "195.00"
+                }
+            }
+        },
+        "risk": {
+            "expected-score": "low",
+            "expected-justification": "6. Low risk due to consistent transaction pattern with usual behavior."
+        },
+        "history": [
+            {
+                "timestamp": "2023-06-10T14:22:11Z",
+                "details": {
+                    "amount": "150.00",
+                    "reason": "Monthly subscription fee"
+                }
+            },
+            {
+                "timestamp": "2023-07-15T11:34:22Z",
+                "details": {
+                    "amount": "250.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2023-08-20T09:44:33Z",
+                "details": {
+                    "amount": "200.00",
+                    "reason": "Donation to charity"
+                }
+            },
+            {
+                "timestamp": "2023-09-25T17:56:44Z",
+                "details": {
+                    "amount": "200.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2023-10-30T10:12:55Z",
+                "details": {
+                    "amount": "250.00",
+                    "reason": "Monthly subscription fee"
+                }
+            },
+            {
+                "timestamp": "2023-11-30T10:12:55Z",
+                "details": {
+                    "amount": "150.00",
+                    "reason": "Donation to charity"
+                }
+            }
+        ]
+    },
+    {
+        "offering": {
+            "id": "offering-40512",
+            "currencyPairs": [
+                {
+                    "pair": "USD/BANK_RANDOM",
+                    "payin": {
+                        "kind": "USD_LEDGER",
+                        "amount": "150.00",
+                        "paymentDetails": {}
+                    },
+                    "payout": {
+                        "kind": "BANK_RANDOM",
+                        "paymentDetails": {
+                            "accountNumber": "0x1122334455",
+                            "reason": "Monthly subscription fee"
+                        }
+                    },
+                    "estimatedSettlementTime": 20
+                }
+            ]
+        },
+        "rfq": {
+            "metadata": {
+                "from": "did:example:user-10016",
+                "to": "did:example:pfi-10016"
+            },
+            "data": {
+                "offeringId": "offering-40512",
+                "payin": {
+                    "kind": "USD_LEDGER",
+                    "amount": "150.00",
+                    "paymentDetails": {}
+                },
+                "payout": {
+                    "kind": "BANK_RANDOM",
+                    "paymentDetails": {
+                        "accountNumber": "0x1122334455",
+                        "reason": "Monthly subscription fee"
+                    }
+                },
+                "claims": ["signed-credential"]
+            }
+        },
+        "quote": {
+            "metadata": {
+                "from": "did:example:pfi-10016",
+                "to": "did:example:user-10016",
+                "exchangeId": "exchange-40512"
+            },
+            "data": {
+                "expiresAt": "2024-06-04T14:00:00Z",
+                "payin": {
+                    "currencyCode": "USD",
+                    "amount": "150.00"
+                },
+                "payout": {
+                    "currencyCode": "USD",
+                    "amount": "145.00"
+                }
+            }
+        },
+        "risk": {
+            "expected-score": "low",
+            "expected-justification": "7. Low risk due to consistent transaction pattern with usual behavior."
+        },
+        "history": [
+            {
+                "timestamp": "2023-06-10T14:22:11Z",
+                "details": {
+                    "amount": "150.00",
+                    "reason": "Monthly subscription fee"
+                }
+            },
+            {
+                "timestamp": "2023-07-15T11:34:22Z",
+                "details": {
+                    "amount": "250.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2023-08-20T09:44:33Z",
+                "details": {
+                    "amount": "200.00",
+                    "reason": "Donation to charity"
+                }
+            },
+            {
+                "timestamp": "2023-09-25T17:56:44Z",
+                "details": {
+                    "amount": "200.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2023-10-30T10:12:55Z",
+                "details": {
+                    "amount": "250.00",
+                    "reason": "Monthly subscription fee"
+                }
+            },
+            {
+                "timestamp": "2023-11-30T10:12:55Z",
+                "details": {
+                    "amount": "150.00",
+                    "reason": "Donation to charity"
+                }
+            }
+        ]
+    }
 ]
 
 import requests
