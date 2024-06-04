@@ -164,7 +164,7 @@ def score():
         data = request.json.get('data')
         data_s = json.dumps(data)
         
-        embedding.add_document(data_s)
+        #embedding.add_document(data_s)
         
         rules = load_rules()
         

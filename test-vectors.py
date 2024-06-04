@@ -1,3 +1,7 @@
+from datetime import datetime, timedelta
+import random
+import requests
+
 vectors = [
     {
         "offering": {
@@ -331,12 +335,215 @@ vectors = [
                 }
             }
         ]
+    },
+    {
+        "offering": {
+            "id": "offering-40513",
+            "currencyPairs": [
+                {
+                    "pair": "USD/BANK_RANDOM",
+                    "payin": {
+                        "kind": "USD_LEDGER",
+                        "amount": "200.00",
+                        "paymentDetails": {}
+                    },
+                    "payout": {
+                        "kind": "BANK_RANDOM",
+                        "paymentDetails": {
+                            "accountNumber": "0x9988776655",
+                            "reason": "Payment for services rendered"
+                        }
+                    },
+                    "estimatedSettlementTime": 20
+                }
+            ]
+        },
+        "rfq": {
+            "metadata": {
+                "from": "did:example:user-10017",
+                "to": "did:example:pfi-10017",
+                "accountAgeMonths": 1
+            },
+            "data": {
+                "offeringId": "offering-40513",
+                "payin": {
+                    "kind": "USD_LEDGER",
+                    "amount": "200.00",
+                    "paymentDetails": {}
+                },
+                "payout": {
+                    "kind": "BANK_RANDOM",
+                    "paymentDetails": {
+                        "accountNumber": "0x9988776655",
+                        "reason": "Payment for services rendered"
+                    }
+                },
+                "claims": ["signed-credential"]
+            }
+        },
+        "quote": {
+            "metadata": {
+                "from": "did:example:pfi-10017",
+                "to": "did:example:user-10017",
+                "exchangeId": "exchange-40513"
+            },
+            "data": {
+                "expiresAt": "2024-06-04T14:00:00Z",
+                "payin": {
+                    "currencyCode": "USD",
+                    "amount": "200.00"
+                },
+                "payout": {
+                    "currencyCode": "USD",
+                    "amount": "195.00"
+                }
+            }
+        },
+        "risk": {
+            "expected-score": "high",
+            "expected-justification": "8. High risk due to account being less than 3 months old with high transaction volume."
+        },
+        "history": [
+            {
+                "timestamp": "2024-04-01T14:22:11Z",
+                "details": {
+                    "amount": "150.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2024-04-05T11:34:22Z",
+                "details": {
+                    "amount": "200.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2024-04-10T09:44:33Z",
+                "details": {
+                    "amount": "250.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2024-04-15T17:56:44Z",
+                "details": {
+                    "amount": "300.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2024-04-20T10:12:55Z",
+                "details": {
+                    "amount": "150.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2024-04-25T12:34:56Z",
+                "details": {
+                    "amount": "200.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2024-04-30T14:56:22Z",
+                "details": {
+                    "amount": "250.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2024-05-05T16:44:33Z",
+                "details": {
+                    "amount": "300.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2024-05-10T18:56:44Z",
+                "details": {
+                    "amount": "150.00",
+                    "reason": "Payment for services rendered"
+                }
+            },
+            {
+                "timestamp": "2024-05-15T20:12:55Z",
+                "details": {
+                    "amount": "200.00",
+                    "reason": "Payment for services rendered"
+                }
+            }
+        ]
+    },
+    {
+        "offering": {
+            "id": "offering-40514",
+            "currencyPairs": [
+                {
+                    "pair": "USD/BANK_RANDOM",
+                    "payin": {
+                        "kind": "USD_LEDGER",
+                        "amount": "50000.00",
+                        "paymentDetails": {}
+                    },
+                    "payout": {
+                        "kind": "BANK_RANDOM",
+                        "paymentDetails": {
+                            "accountNumber": "0x4455667788",
+                            "reason": "Office supplies"
+                        }
+                    },
+                    "estimatedSettlementTime": 20
+                }
+            ]
+        },
+        "rfq": {
+            "metadata": {
+                "from": "did:example:user-10018",
+                "to": "did:example:pfi-10018"
+            },
+            "data": {
+                "offeringId": "offering-40514",
+                "payin": {
+                    "kind": "USD_LEDGER",
+                    "amount": "50000.00",
+                    "paymentDetails": {},
+                    "reason": "for lunch"
+                },
+                "payout": {
+                    "kind": "BANK_RANDOM",
+                    "paymentDetails": {
+                        "accountNumber": "0x4455667788",
+                    }
+                },
+                "claims": ["signed-credential"]
+            }
+        },
+        "quote": {
+            "metadata": {
+                "from": "did:example:pfi-10018",
+                "to": "did:example:user-10018",
+                "exchangeId": "exchange-40514"
+            },
+            "data": {
+                "expiresAt": "2024-06-04T14:00:00Z",
+                "payin": {
+                    "currencyCode": "USD",
+                    "amount": "50000.00"
+                },
+                "payout": {
+                    "currencyCode": "USD",
+                    "amount": "49500.00"
+                }
+            }
+        },
+        "risk": {
+            "expected-score": "high",
+            "expected-justification": "9. High risk due to mismatch between the transaction amount and the stated reason."
+        }
     }
 ]
-
-import requests
-import pandas as pd
-from tabulate import tabulate
 
 def run_tests():
     url = 'http://localhost:8080/api/score'
