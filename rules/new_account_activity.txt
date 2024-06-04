@@ -1,1 +1,0 @@
-If the account is less than 3 months old and has high transaction volume, mark it as high risk.
