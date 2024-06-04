@@ -14,7 +14,8 @@ app = Flask(__name__)
 RULES_DIR = './rules'
 LLAMAFILE_PORT = 9090
 LLAMAFILE_NAME = "llamafile"
-LLAMAFILE_MODEL = "phi-3-medium-128k-instruct-Q5_K_M.gguf"
+#LLAMAFILE_MODEL = "phi-3-medium-128k-instruct-Q5_K_M.gguf"
+LLAMAFILE_MODEL="phi-3-mini-128k-instruct.Q8_0.gguf"
 
 # Utility functions
 def load_rules():
@@ -46,38 +47,34 @@ def json_to_human_readable(data, indent=0):
 
 def call_llm_for_evaluation(human_readable_data, rules):
     rules_text = '\n'.join([f"Rule {i+1}: {rule}" for i, rule in enumerate(rules)])
-    system_prompt = (
-        "Transcript of a never-ending dialog, where the User interacts with an Assistant reviewing remittance related data. "
-        "The Assistant is a risk evaluating agent looking for risks according to the provided rules. "
-        "The Assistant is helpful, honest, good at writing, and never fails to answer the User's requests immediately and with precision."
-    )
-    
+
     n_shot_examples = (
-        "User: Here is a transaction with an amount of 0.0001 BTC.\n"
-        "Assistant: low\n\n"
-        "User: Here is a transaction with an amount of 10,000 USD to an unknown account.\n"
-        "Assistant: high\n\n"
-        "User: Here is a transaction with an amount of 500 USD from a well-known merchant.\n"
-        "Assistant: low\n\n"
-        "User: Here is a transaction with an amount of 50,000 USD with no stated reason.\n"
-        "Assistant: high\n\n"
-        "User: Here is a transaction with an amount of 200 USD from USD to MOMO.\n"
-        "Assistant: low\n"
+        "<|user|>\nHere is a transaction with an amount of 0.0001 BTC.<|end|>\n"
+        "<|assistant|>\nlow<|end|>\n"
+        "<|user|>\nHere is a transaction with an amount of 10,000 USD to an unknown account.<|end|>\n"
+        "<|assistant|>\nhigh<|end|>\n"
+        "<|user|>\nHere is a transaction with an amount of 500 USD from a well-known merchant.<|end|>\n"
+        "<|assistant|>\nlow<|end|>\n"
+        "<|user|>\nHere is a transaction with an amount of 50,000 USD with no stated reason.<|end|>\n"
+        "<|assistant|>\nhigh<|end|>\n"
+        "<|user|>\nHere is a transaction with an amount of 200 USD from USD to MOMO.<|end|>\n"
+        "<|assistant|>\nlow<|end|>\n"
     )
     
     prompt = (
-        f"{system_prompt}\n\n"
-        f"User: Evaluate the following transactional data based on the provided rules and determine the risk level. "
+        f"<|user|>\nEvaluate the following transactional data based on the provided rules and determine the risk level. "
         f"Return only the risk level as a single word: 'high' or 'low'.\n\n"
         f"tbDEX Protocol Description:\n{TBDEX_PROTOCOL_DESCRIPTION}\n\n"
         f"And some explanations of jargon:\n{TBDEX_JARGON}\n\n"
-        f"Rules:\n{rules_text}\n\n"
-        f"Example:\n"
+        f"Rules to apply:\n{rules_text}<|end|>\n"
+        f"<|assistant|>\nok understood<|end|>\n"
+        f"<|user|>\nExamples follow:<|end|>\n"
         f"{n_shot_examples}\n"
-        f"Transactional Data:\n{human_readable_data}\n\n"
-        f"User: Based on the rules provided, evaluate the data and return the risk level as a single word: 'high' or 'low'.\n"
-        f"Ensure your evaluation strictly adheres to the given rules without creating new ones.\n"
-        f"Assistant:"
+        f"<|user|>\nTransactional Data:\n{human_readable_data}<|end|>\n"
+        f"<|assistant|>\nok<|end|>\n"
+        f"<|user|>\nBased on the rules provided, evaluate the data and return the risk level as a single word: 'high' or 'low'."
+        f"Ensure your evaluation strictly adheres to the given rules without creating new ones.<|end|>\n"
+        f"<|assistant|>"
     )
 
     response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
@@ -111,15 +108,17 @@ def call_llm_for_justification(human_readable_data, rules, risk_level):
     )
     
     prompt = (
-        f"User: The following transaction has been flagged as '{risk_level}' risk. Provide a brief justification for this risk level based on the rules provided. "
+        f"<|user|>\nThe following transaction has been flagged as '{risk_level}' risk. Provide a brief justification for this risk level based on the rules provided. "
         f"Ensure to include the word '{risk_level}' in your justification and only refer to the given rules without creating new ones. "
-        f"Each rule you reference must be explicitly quoted as given in the list of rules.\n\n"
-        f"tbDEX Protocol Description:\n{TBDEX_PROTOCOL_DESCRIPTION}\n\n"
-        f"And some explanations of jargon:\n{TBDEX_JARGON}\n\n"
-        f"Rules:\n{rules_text}\n\n"
-        f"Transactional Data:\n{human_readable_data}\n\n"
-        f"{chain_of_thought}\n\n"
-        f"Assistant: Provide a brief explanation as to why the transaction is considered '{risk_level}' risk based on the rules and data."
+        f"Each rule you reference must be explicitly quoted as given in the list of rules DO not invent rules.\n\n"
+        f"Protocol Description:\n{TBDEX_PROTOCOL_DESCRIPTION}\n\n"
+        f"Some definitions:\n{TBDEX_JARGON}<|end|>\n"
+        f"<|assistant|>\nok now tell me the rules that I will use<|end|>\n"
+        f"<|user|>\nRules:\n{rules_text}<|end|>\n\n"
+        f"<|assistant|>\nok now show me the data that I will consider with the rules<|end|>\n"
+        f"<|user|>\n\Data:\n{human_readable_data}\n\n"
+        f"{chain_of_thought}\n Provide a brief explanation as to why the transaction is considered '{risk_level}' risk based ONLY on the rules and data provided.<|end|>\n"
+        f"<|assistant|>"
     )
 
     response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
