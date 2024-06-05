@@ -5,7 +5,9 @@ import json
 import subprocess
 import signal
 import time
-import embedding
+import logging
+import re
+
 from tbdex import TBDEX_PROTOCOL_DESCRIPTION, TBDEX_JARGON
 
 app = Flask(__name__)
@@ -14,8 +16,10 @@ app = Flask(__name__)
 RULES_DIR = './rules'
 LLAMAFILE_PORT = 9090
 LLAMAFILE_NAME = "llamafile"
-#LLAMAFILE_MODEL = "phi-3-medium-128k-instruct-Q5_K_M.gguf"
-LLAMAFILE_MODEL="phi-3-mini-128k-instruct.Q8_0.gguf"
+LLAMAFILE_MODEL = "phi-3-mini-128k-instruct.Q8_0.gguf"
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 # Utility functions
 def load_rules():
@@ -45,37 +49,24 @@ def json_to_human_readable(data, indent=0):
         human_readable.append(f"{indent_str}{data}")
     return '\n'.join(human_readable)
 
-def call_llm_for_evaluation(human_readable_data, rules):
-    rules_text = '\n'.join([f"Rule {i+1}: {rule}" for i, rule in enumerate(rules)])
-
-    n_shot_examples = (
-        "<|user|>\nHere is a transaction with an amount of 0.0001 BTC.<|end|>\n"
-        "<|assistant|>\nlow<|end|>\n"
-        "<|user|>\nHere is a transaction with an amount of 10,000 USD to an unknown account.<|end|>\n"
-        "<|assistant|>\nhigh<|end|>\n"
-        "<|user|>\nHere is a transaction with an amount of 500 USD from a well-known merchant.<|end|>\n"
-        "<|assistant|>\nlow<|end|>\n"
-        "<|user|>\nHere is a transaction with an amount of 50,000 USD with no stated reason.<|end|>\n"
-        "<|assistant|>\nhigh<|end|>\n"
-        "<|user|>\nHere is a transaction with an amount of 200 USD from USD to MOMO.<|end|>\n"
-        "<|assistant|>\nlow<|end|>\n"
-    )
-    
+def call_llm_for_rule_evaluation(human_readable_data, rule, rule_name):
     prompt = (
-        f"<|user|>\nEvaluate the following transactional data based on the provided rules and determine the risk level. "
-        f"Return only the risk level as a single word: 'high' or 'low'.\n\n"
-        f"tbDEX Protocol Description:\n{TBDEX_PROTOCOL_DESCRIPTION}\n\n"
-        f"And some explanations of jargon:\n{TBDEX_JARGON}\n\n"
-        f"Rules to apply:\n{rules_text}<|end|>\n"
-        f"<|assistant|>\nok understood<|end|>\n"
-        f"<|user|>\nExamples follow:<|end|>\n"
-        f"{n_shot_examples}\n"
-        f"<|user|>\nTransactional Data:\n{human_readable_data}<|end|>\n"
-        f"<|assistant|>\nok<|end|>\n"
-        f"<|user|>\nBased on the rules provided, evaluate the data and return the risk level as a single word: 'high' or 'low'."
-        f"Ensure your evaluation strictly adheres to the given rules without creating new ones.<|end|>\n"
-        f"<|assistant|>"
+        f"{TBDEX_PROTOCOL_DESCRIPTION}\n\n"
+        f"{TBDEX_JARGON}\n\n"
+        f"Examples:\n"
+        f"User: \nTransaction Data: Here is a transaction with an amount of 0.0001 BTC.\nRule: Transactions above 10 BTC.\nAssistant: \nno\n"
+        f"User: \nTransaction Data: Here is a transaction with an amount of 15 BTC.\nRule: Transactions above 10 BTC.\nAssistant: \nyes\n"
+        f"User: \nTransaction Data: Here is a transaction to an unknown account.\nRule: Transactions to unknown accounts.\nAssistant: \nyes\n"
+        f"User: \nTransaction Data: Here is a transaction to a known account.\nRule: Transactions to unknown accounts.\nAssistant: \nno\n\n"
+        f"These are examples of how to reply.\n\n"
+        f"User: \nEvaluate the following transactional data against the rule and answer strictly with 'yes' or 'no'.\n\n"
+        f"Transaction Data:\n{human_readable_data}\n\n"
+        f"Rule: {rule}\n\n"
+        f"User: \Based on the rule above, does the Transaction Data violate that rule? Answer 'yes' or 'no'.\nAssistant: "
     )
+
+    logging.info(f"Testing rule: {rule_name}")
+    logging.info(f"Calling LLM with prompt: {prompt}")
 
     response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
         'prompt': prompt,
@@ -87,60 +78,23 @@ def call_llm_for_evaluation(human_readable_data, rules):
         'stop': ["User:", "Assistant:"]
     })
     response_data = response.json()
-    response_text = response_data['content'].strip().split('\n')[0].lower()
-    print("risk level response:", response_text)
-    if any(word in response_text for word in ["high", "low"]):
-        # Extract the first instance of 'high' or 'low'
-        risk_level = next((word for word in ["high", "low"] if word in response_text), "low")
-        return risk_level
-    return "low"  # Default to low if response is not clear
-
-def call_llm_for_justification(human_readable_data, rules, risk_level):
-    rules_text = '\n'.join([f"Rule {i+1}: {rule}" for i, rule in enumerate(rules)])
-    
-    # Adding more specific chain-of-thought guidance
-    chain_of_thought = (
-        "Let's analyze the data step-by-step to determine the justification:\n"
-        "1. Identify which rules apply to this transaction.\n"
-        "2. Check if the transaction data matches the conditions in those rules.\n"
-        "3. Provide a justification based on the applicable rules and transaction data.\n"
-        "4. Ensure the justification mentions the specific rules and why they apply without introducing any new rules."
-    )
-    
-    prompt = (
-        f"<|user|>\nThe following transaction has been flagged as '{risk_level}' risk. Provide a brief justification for this risk level based on the rules provided. "
-        f"Ensure to include the word '{risk_level}' in your justification and only refer to the given rules without creating new ones. "
-        f"Each rule you reference must be explicitly quoted as given in the list of rules DO not invent rules.\n\n"
-        f"Protocol Description:\n{TBDEX_PROTOCOL_DESCRIPTION}\n\n"
-        f"Some definitions:\n{TBDEX_JARGON}<|end|>\n"
-        f"<|assistant|>\nok now tell me the rules that I will use<|end|>\n"
-        f"<|user|>\nRules:\n{rules_text}<|end|>\n\n"
-        f"<|assistant|>\nok now show me the data that I will consider with the rules<|end|>\n"
-        f"<|user|>\n\Data:\n{human_readable_data}\n\n"
-        f"{chain_of_thought}\n Provide a brief explanation as to why the transaction is considered '{risk_level}' risk based ONLY on the rules and data provided.<|end|>\n"
-        f"<|assistant|>"
-    )
-
-    response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
-        'prompt': prompt,
-        'n_predict': 50,
-        'temperature': 0.0,
-        'top_p': 0.9,
-        'min_p': 0.4,
-        'top_k': 50,
-        'stop': ["User:", "Assistant:"]
-    })
-    response_data = response.json()
     response_text = response_data['content'].strip().lower()
-    print("justification response:", response_text)
-    return response_text
+
+    logging.info(f"LLM response: {response_text}")
+
+    # Check for simple 'yes' or 'no' in the response
+    match = re.search(r'\b(yes|no)\b', response_text)
+    if match:
+        return match.group(1) == 'yes'
+    else: 
+        return False     
 
 def clean_json(json_string):
     try:
         cleaned_data = json.loads(json_string)
         return json.dumps(cleaned_data, indent=2)
     except json.JSONDecodeError as e:
-        print("JSON Decode Error:", e)
+        logging.error(f"JSON Decode Error: {e}")
         return json_string
 
 def run_llamafile():
@@ -148,7 +102,7 @@ def run_llamafile():
         raise FileNotFoundError(f'{LLAMAFILE_NAME} does not exist.')
 
     command = f'./{LLAMAFILE_NAME} -m {LLAMAFILE_MODEL} --port {LLAMAFILE_PORT}'
-    print(f'Running {command}...')
+    logging.info(f'Running {command}...')
     
     llamafile_process = subprocess.Popen(command, 
                                          shell=True, 
@@ -163,37 +117,39 @@ def score():
         data = request.json.get('data')
         data_s = json.dumps(data)
         
-        #embedding.add_document(data_s)
-        
         rules = load_rules()
         
         # Convert JSON data to human-readable format
         human_readable_data = json_to_human_readable(data)
         
-        # Step 1: Determine the risk level
-        risk_response = call_llm_for_evaluation(human_readable_data, rules).strip().lower()
+        # Evaluate each rule
+        high_risk_flagged = False
+        for i, rule in enumerate(rules):
+            rule_name = f"Rule {i+1}"
+            applies = call_llm_for_rule_evaluation(human_readable_data, rule, rule_name)
+            if applies:
+                high_risk_flagged = True
+                break
         
-        if risk_response == "high":
-            # Step 2: Request justification for flagged transactions
-            justification_response = call_llm_for_justification(human_readable_data, rules, risk_response).strip().lower()
+        if high_risk_flagged:
             result = {
-                "score": risk_response,
-                "justification": justification_response
+                "score": "high",
+                "justification": f"The transaction was flagged as high risk due to rule: {rule}"
             }
         else:
             result = {
                 "score": "low",
-                "justification": "None needed for low risk transactions."
+                "justification": "None of the rules applied to this transaction."
             }
         
         return jsonify(result)
         
     except Exception as e:
         error_message = str(e)
-        print("Error:", error_message)
+        logging.error(f"Error: {error_message}")
         return jsonify({'error': error_message}), 500
 
-if __name__:
+if __name__ == '__main__':
     llamafile_process = run_llamafile()
     try:
         app.run(port=8080)
