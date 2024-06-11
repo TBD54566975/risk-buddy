@@ -49,7 +49,7 @@ def json_to_human_readable(data, indent=0):
         human_readable.append(f"{indent_str}{data}")
     return '\n'.join(human_readable)
 
-def call_llm_for_rule_evaluation(human_readable_data, rule, rule_name):
+def call_llm_for_rule_evaluation(human_readable_data, rule):
     prompt = (
         f"{TBDEX_PROTOCOL_DESCRIPTION}\n\n"
         f"{TBDEX_JARGON}\n\n"
@@ -65,7 +65,6 @@ def call_llm_for_rule_evaluation(human_readable_data, rule, rule_name):
         f"User: \Based on the rule above, does the Transaction Data violate that rule? Answer 'yes' or 'no'.\nAssistant: "
     )
 
-    logging.info(f"Testing rule: {rule_name}")
     logging.info(f"Calling LLM with prompt: {prompt}")
 
     response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
@@ -124,17 +123,21 @@ def score():
         
         # Evaluate each rule
         high_risk_flagged = False
+        rules_matched = []
+        rules_checked = []
         for i, rule in enumerate(rules):
             rule_name = f"Rule {i+1}"
-            applies = call_llm_for_rule_evaluation(human_readable_data, rule, rule_name)
+            rules_checked.append(rule_name)
+            applies = call_llm_for_rule_evaluation(human_readable_data, rule)
             if applies:
+                print("RULE APPLIES", rule_name)
+                rules_matched.append(rule)
                 high_risk_flagged = True
-                break
         
         if high_risk_flagged:
             result = {
                 "score": "high",
-                "justification": f"The transaction was flagged as high risk due to rule: {rule}"
+                "justification": f"The transaction was flagged as high risk due to rule: {rules_matched} with rules checked: {rules_checked}."
             }
         else:
             result = {

@@ -485,14 +485,10 @@ vectors = [
                     "payin": {
                         "kind": "USD_LEDGER",
                         "amount": "50000.00",
-                        "paymentDetails": {}
                     },
                     "payout": {
                         "kind": "BANK_RANDOM",
-                        "paymentDetails": {
-                            "accountNumber": "0x4455667788",
-                            "reason": "Office supplies"
-                        }
+                        "amount": "50000.00",
                     },
                     "estimatedSettlementTime": 20
                 }
@@ -515,7 +511,7 @@ vectors = [
                     "kind": "BANK_RANDOM",
                     "paymentDetails": {
                         "accountNumber": "0x4455667788",
-                        "reason": "for lunch"
+                        "reason": "payment for lunch"
                     }
                 },
                 "claims": ["signed-credential"]
