@@ -1,0 +1,29 @@
+{
+    "rules": [
+        {
+            "condition": "len([pair for pair in transaction['offering']['currencyPairs'] if pair['payin']['kind'] == 'USD_LEDGER' and float(pair['payin']['amount']) > 300]) > 0",
+            "action": "risky",
+            "message": "Payin amount from USD_LEDGER is too high"
+        },
+        {
+            "condition": "len([pair for pair in transaction['offering']['currencyPairs'] if pair['estimatedSettlementTime'] > 10]) > 0",
+            "action": "risky",
+            "message": "Estimated settlement time is too long"
+        },
+        {
+            "condition": "len([pair for pair in transaction['offering']['currencyPairs'] if not pair['payout']['paymentDetails'].get('reason')]) > 0",
+            "action": "risky",
+            "message": "Payout reason is missing or empty"
+        },
+        {
+            "condition": "len([tx for tx in history[1:] if tx['quote']['data']['expiresAt'] > (datetime.now() - relativedelta(months=3)).isoformat()]) > 3",
+            "action": "risky",
+            "message": "More than 3 transactions in the past 3 months"
+        },
+        {
+            "condition": "len([pair for pair in transaction['offering']['currencyPairs'] if float(pair['payin']['amount']) > 1000]) > 0 and (datetime.now() - datetime.fromisoformat(transaction['accountCreated'])).days < 30",
+            "action": "risky",
+            "message": "Transaction over 1000 and account is less than one month old"
+        }
+    ]
+}
