@@ -15,7 +15,7 @@ def load_json(file_path):
         return json.load(file)
 
 def call_llm(prompt):
-    """Call the LLM to evaluate a fuzzy condition."""
+    """TODO: call the LLM for real with real data."""
     response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
         'prompt': prompt,
         'n_predict': 10,
@@ -101,6 +101,7 @@ def main():
             validate(instance=item, schema=schema)
         print("Data is valid.")
     except jsonschema.exceptions.ValidationError as err:
+        # TODO: in this case will evaluate the rules against the data all as LLM - as we don't know the structure enough for hard evals.
         print(f"Data is invalid: {err.message}")
         return
 
