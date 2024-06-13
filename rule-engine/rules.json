@@ -21,7 +21,7 @@
             "message": "More than 3 transactions in the past 3 months"
         },
         {
-            "condition": "len([pair for pair in transaction['offering']['currencyPairs'] if float(pair['payin']['amount']) > 1000]) > 0 and (datetime.now() - datetime.fromisoformat(transaction['accountCreated'])).days < 30",
+            "condition": "len([pair for pair in transaction['offering']['currencyPairs'] if float(pair['payin']['amount']) > 1000]) > 0 and (datetime.now() - isoparse(transaction['accountCreated'])).days < 30",
             "action": "risky",
             "message": "Transaction over 1000 and account is less than one month old"
         }
