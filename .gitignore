@@ -2,3 +2,4 @@
 llama.log
 *.gguf
 .hermit
+__pycache__
