@@ -12,6 +12,6 @@ dev: download-models
 
 
 test:
-	python test-vectors.py
+	python test.py
 
 	

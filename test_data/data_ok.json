@@ -1,0 +1,130 @@
+[
+    {
+        "offering": {
+            "id": "offering-40512",
+            "currencyPairs": [
+                {
+                    "pair": "USD/BANK_STABLE",
+                    "payin": {
+                        "kind": "USD_LEDGER",
+                        "amount": "250.00",
+                        "paymentDetails": {}
+                    },
+                    "payout": {
+                        "kind": "BANK_STABLE",
+                        "paymentDetails": {
+                            "accountNumber": "0x1122334455",
+                            "reason": "Payment for services rendered"
+                        }
+                    },
+                    "estimatedSettlementTime": 5
+                }
+            ]
+        },
+        "rfq": {
+            "metadata": {
+                "from": "did:example:user-20015",
+                "to": "did:example:pfi-20015"
+            },
+            "data": {
+                "offeringId": "offering-40512",
+                "payin": {
+                    "kind": "USD_LEDGER",
+                    "amount": "250.00",
+                    "paymentDetails": {}
+                },
+                "payout": {
+                    "kind": "BANK_STABLE",
+                    "paymentDetails": {
+                        "accountNumber": "0x1122334455",
+                        "reason": "Payment for services rendered"
+                    }
+                },
+                "claims": ["signed-credential"]
+            }
+        },
+        "quote": {
+            "metadata": {
+                "from": "did:example:pfi-20015",
+                "to": "did:example:user-20015",
+                "exchangeId": "exchange-40512"
+            },
+            "data": {
+                "expiresAt": "2024-06-10T14:00:00Z",
+                "payin": {
+                    "currencyCode": "USD",
+                    "amount": "250.00"
+                },
+                "payout": {
+                    "currencyCode": "USD",
+                    "amount": "245.00"
+                }
+            }
+        },
+        "accountCreated": "2024-04-01T00:00:00Z"
+    },
+    {
+        "offering": {
+            "id": "offering-40513",
+            "currencyPairs": [
+                {
+                    "pair": "USD/BANK_STABLE",
+                    "payin": {
+                        "kind": "USD_LEDGER",
+                        "amount": "200.00",
+                        "paymentDetails": {}
+                    },
+                    "payout": {
+                        "kind": "BANK_STABLE",
+                        "paymentDetails": {
+                            "accountNumber": "0x5566778899",
+                            "reason": "Payment for services rendered"
+                        }
+                    },
+                    "estimatedSettlementTime": 3
+                }
+            ]
+        },
+        "rfq": {
+            "metadata": {
+                "from": "did:example:user-30015",
+                "to": "did:example:pfi-30015"
+            },
+            "data": {
+                "offeringId": "offering-40513",
+                "payin": {
+                    "kind": "USD_LEDGER",
+                    "amount": "200.00",
+                    "paymentDetails": {}
+                },
+                "payout": {
+                    "kind": "BANK_STABLE",
+                    "paymentDetails": {
+                        "accountNumber": "0x5566778899",
+                        "reason": "Payment for services rendered"
+                    }
+                },
+                "claims": ["signed-credential"]
+            }
+        },
+        "quote": {
+            "metadata": {
+                "from": "did:example:pfi-30015",
+                "to": "did:example:user-30015",
+                "exchangeId": "exchange-40513"
+            },
+            "data": {
+                "expiresAt": "2024-06-09T14:00:00Z",
+                "payin": {
+                    "currencyCode": "USD",
+                    "amount": "200.00"
+                },
+                "payout": {
+                    "currencyCode": "USD",
+                    "amount": "195.00"
+                }
+            }
+        },
+        "accountCreated": "2023-12-01T00:00:00Z"
+    }
+]
