@@ -183,28 +183,41 @@ def evaluate_rules(transaction, history, rules):
         if is_valid_expression(condition, aeval):
             # The whole condition is valid, evaluate directly
             if aeval(condition):
-                results.append({"action": rule['action'], "message": rule['message']})
+                results.append(rule['message'])
         else:
+            print("here")
             # Split the condition and evaluate parts
             parts = condition.split(' and ')
             part1_valid = is_valid_expression(parts[0], aeval)
             part2_valid = len(parts) > 1 and is_valid_expression(parts[1], aeval)
-            
+            print("here2")
+
             if part1_valid and part2_valid:
                 if aeval(parts[0]) and aeval(parts[1]):
-                    results.append({"action": rule['action'], "message": rule['message']})
+                    results.append(rule['message'])
             elif part1_valid:
                 if aeval(parts[0]) and call_llm(transaction, history, parts[1].strip()):
-                    results.append({"action": rule['action'], "message": rule['message']})
+                    results.append(rule['message'])
             elif part2_valid:
                 if aeval(parts[1]) and call_llm(transaction, history, parts[0].strip()):
-                    results.append({"action": rule['action'], "message": rule['message']})
+                    results.append(rule['message'])
             else:
                 # Both parts are fuzzy
                 if call_llm(transaction, history, condition.strip):
-                    results.append({"action": rule['action'], "message": rule['message']})
+                    results.append(rule['message'])
 
-    return results
+    if len(results) > 0:
+        result = {
+            "score": "high",
+            "justification": f"The transaction was flagged as high risk due to the following rules: {results}."
+        }
+    else:
+        result = {
+            "score": "low",
+            "justification": "None of the rules applied to this transaction."
+        }     
+    return jsonify(result)       
+
 
 schema = load_json('schema.json')
 rules = load_json('rules.json')['rules']
@@ -234,12 +247,7 @@ def score():
         # get the head and then tail as history 
         transaction = history[0]
         history = history[1:]
-        results = evaluate_rules(transaction, history, rules)
-        print("Evaluation Results:", json.dumps(results, indent=4))
-        if len(results) > 0:
-            return jsonify({"score": "high", "justification": "The transaction was flagged as high risk due to the following rules: " + json.dumps(results, indent=4)})
-        else:
-            return jsonify({"score": "low", "justification": ""})
+        return evaluate_rules(transaction, history, rules)
 
         
         

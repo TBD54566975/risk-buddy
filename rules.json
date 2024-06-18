@@ -1,7 +1,7 @@
 {
     "rules": [
         {
-            "condition": "len([pair for pair in transaction['offering']['currencyPairs'] if pair['payin']['kind'] == 'USD_LEDGER' and float(pair['payin']['amount']) > 300]) > 0",
+            "condition": "len([pair for pair in transaction['offering']['currencyPairs'] if pair['payin']['kind'] == 'USD_LEDGER' and float(pair['payin']['amount']) > 30000]) > 0",
             "action": "risky",
             "message": "Payin amount from USD_LEDGER is too high"
         },
