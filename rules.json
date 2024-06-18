@@ -31,11 +31,6 @@
             "message": "mismatching explanation and amount"
         },
         {
-            "condition": "If the transaction has withheld information and reason seems intentionally vague",
-            "action": "risky",
-            "message": "No valid explanation."
-        },
-        {
             "condition": "the transaction pattern deviates significantly from the customer's usual behavior.",
             "action": "risky",
             "message": "Customer Behavioral change"

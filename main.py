@@ -149,11 +149,12 @@ def load_json(file_path):
 
 def is_valid_expression(condition, aeval):
     """Check if the condition is a valid expression."""
-    try:
-        aeval(condition)
-        return True
-    except Exception:
+    aeval(condition)
+    if aeval.error:
+        aeval.error = []
+        print("condition is not valid", condition)
         return False
+    return True
 
 def evaluate_rules(transaction, history, rules):
     """
@@ -179,9 +180,12 @@ def evaluate_rules(transaction, history, rules):
 
     for rule in rules:
         condition = rule['condition']
+        print("!!!!!   -----> CONDITION:", condition)
         
         if is_valid_expression(condition, aeval):
+            
             # The whole condition is valid, evaluate directly
+            print("!!!!!   -----> VALID")
             if aeval(condition):
                 results.append(rule['message'])
         else:
@@ -203,7 +207,7 @@ def evaluate_rules(transaction, history, rules):
                     results.append(rule['message'])
             else:
                 # Both parts are fuzzy
-                if call_llm(transaction, history, condition.strip):
+                if call_llm(transaction, history, condition.strip()):
                     results.append(rule['message'])
 
     if len(results) > 0:
@@ -237,7 +241,7 @@ def score():
         try:
             for item in history:
                 validate(instance=item, schema=schema)
-            print("Data is valid against schema.")                        
+            
 
         except jsonschema.exceptions.ValidationError as err:
             print(f"Data is not according to schema, will use LLM only: {err.message}")
@@ -245,6 +249,7 @@ def score():
             
         # Evaluate rules against the transaction and history
         # get the head and then tail as history 
+        print("Data is valid against schema.")                        
         transaction = history[0]
         history = history[1:]
         return evaluate_rules(transaction, history, rules)
