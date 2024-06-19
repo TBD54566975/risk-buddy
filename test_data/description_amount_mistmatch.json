@@ -14,7 +14,7 @@
                         "kind": "BANK_STABLE",
                         "paymentDetails": {
                             "accountNumber": "0x1122334455",
-                            "reason": "Payment for rental accomodation"
+                            "reason": "Payment for a coffee"
                         }
                     },
                     "estimatedSettlementTime": 5
@@ -37,7 +37,7 @@
                     "kind": "BANK_STABLE",
                     "paymentDetails": {
                         "accountNumber": "0x1122334455",
-                        "reason": "Payment for rental accomodation"
+                        "reason": "Payment for services rendered"
                     }
                 },
                 "claims": ["signed-credential"]
@@ -78,7 +78,7 @@
                         "kind": "BANK_STABLE",
                         "paymentDetails": {
                             "accountNumber": "0x5566778899",
-                            "reason": "Payment for rental accomodation"
+                            "reason": "Payment for services rendered"
                         }
                     },
                     "estimatedSettlementTime": 3
@@ -101,7 +101,7 @@
                     "kind": "BANK_STABLE",
                     "paymentDetails": {
                         "accountNumber": "0x5566778899",
-                        "reason": "Payment for rental accomodation"
+                        "reason": "Payment for services rendered"
                     }
                 },
                 "claims": ["signed-credential"]

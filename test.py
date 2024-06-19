@@ -14,6 +14,7 @@ def run_tests():
                 test_data = json.load(file)
                 response = requests.post(url, json={'data': test_data})    
                 print(test_file, response.json())
+                print('\n\n\n')
 
     
 if __name__ == '__main__':

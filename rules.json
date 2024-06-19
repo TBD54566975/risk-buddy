@@ -26,12 +26,12 @@
             "message": "Transaction over 1000 and account is less than one month old"
         },
         {
-            "condition": "if the stated reason for the transaction doesn't match up with the magnitude of purchase (common sense).",
+            "condition": "if the stated reason for the transaction doesn't match up with the magnitude of purchase",
             "action": "risky",
             "message": "mismatching explanation and amount"
         },
         {
-            "condition": "the transaction pattern deviates significantly from the customer's usual behavior in amounts they are spending.",
+            "condition": "the current transaction deviates a lot from the customer's historical behavior, for example a sudden large purchase",
             "action": "risky",
             "message": "Customer Behavioral change"
         },

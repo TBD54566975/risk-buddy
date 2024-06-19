@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 from dateutil.parser import isoparse
 
-from tbdex import TBDEX_PROTOCOL_DESCRIPTION, TBDEX_JARGON
+from tbdex import make_prompt
 
 app = Flask(__name__)
 
@@ -48,31 +48,18 @@ def json_to_human_readable(data, indent=0):
     return '\n'.join(human_readable)
 
 def call_llm_for_rule_evaluation(human_readable_data, rule):
-    prompt = (
-        f"{TBDEX_PROTOCOL_DESCRIPTION}\n\n"
-        f"{TBDEX_JARGON}\n\n"
-        f"Examples:\n"
-        f"User: \nTransaction Data: Here is a transaction with an amount of 0.0001 BTC.\nRule: Transactions above 10 BTC.\nAssistant: \nno\n"
-        f"User: \nTransaction Data: Here is a transaction with an amount of 15 BTC.\nRule: Transactions above 10 BTC.\nAssistant: \nyes\n"
-        f"User: \nTransaction Data: Here is a transaction to an unknown account.\nRule: Transactions to unknown accounts.\nAssistant: \nyes\n"
-        f"User: \nTransaction Data: Here is a transaction to a known account.\nRule: Transactions to unknown accounts.\nAssistant: \nno\n\n"
-        f"These are examples of how to reply.\n\n"
-        f"User: \nEvaluate the following transactional data against the rule and answer strictly with 'yes' or 'no'.\n\n"
-        f"{human_readable_data}\n\n"
-        f"Rule to check against: {rule}\n\n"
-        f"User: Based on the rule above, does the Transaction Data violate that rule? IT IS CRITICAL that you answer 'yes' or 'no'.\nAssistant: "
-    )
 
-    logging.info(f"Calling LLM with prompt: {prompt}")
+    prompt = make_prompt(human_readable_data, rule)
+    
 
     response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
         'prompt': prompt,
-        'n_predict': 20,
+        'n_predict': 200,
         'temperature': 0.0,
         'top_p': 0.9,
         'min_p': 0.4,
         'top_k': 50,
-        'stop': ["User:", "Assistant:"]
+        'stop': ["User:", "Assistant:", "Transaction Data:", "Rule:", "###"]
     })
     response_data = response.json()
     response_text = response_data['content'].strip().lower()
@@ -177,8 +164,8 @@ def evaluate_rules(transaction, history, rules):
 
     def call_llm(transaction, history, rule):
         if history:
-            return call_llm_for_rule_evaluation("Current transaction:\n" +json_to_human_readable(transaction)+
-                                                "\n\n\nHisorical transactions:\n" +json_to_human_readable(history), rule)
+            return call_llm_for_rule_evaluation("### Current transaction to validate:\n" +json_to_human_readable(transaction)+
+                                                "\n\n\n### Hisorical transactions to consider:\n" +json_to_human_readable(history), rule)                        
         else:
             return call_llm_for_rule_evaluation(json_to_human_readable(transaction), rule)
 

@@ -68,14 +68,14 @@
             "id": "offering-40515",
             "currencyPairs": [
                 {
-                    "pair": "USD/BANK_STABLE",
+                    "pair": "USD/BANK",
                     "payin": {
-                        "kind": "USD_LEDGER",
+                        "kind": "USD",
                         "amount": "300.00",
                         "paymentDetails": {}
                     },
                     "payout": {
-                        "kind": "BANK_STABLE",
+                        "kind": "BANK",
                         "paymentDetails": {
                             "accountNumber": "0x1122334455",
                             "reason": "Payment for services rendered"
@@ -93,12 +93,12 @@
             "data": {
                 "offeringId": "offering-40515",
                 "payin": {
-                    "kind": "USD_LEDGER",
+                    "kind": "USD",
                     "amount": "300.00",
                     "paymentDetails": {}
                 },
                 "payout": {
-                    "kind": "BANK_STABLE",
+                    "kind": "BANK",
                     "paymentDetails": {
                         "accountNumber": "0x1122334455",
                         "reason": "Payment for services rendered"
@@ -132,14 +132,14 @@
             "id": "offering-40516",
             "currencyPairs": [
                 {
-                    "pair": "USD/BANK_STABLE",
+                    "pair": "USD",
                     "payin": {
-                        "kind": "USD_LEDGER",
+                        "kind": "USD",
                         "amount": "500.00",
                         "paymentDetails": {}
                     },
                     "payout": {
-                        "kind": "BANK_STABLE",
+                        "kind": "BANK",
                         "paymentDetails": {
                             "accountNumber": "0x5566778899",
                             "reason": "Payment for services rendered"
@@ -157,12 +157,12 @@
             "data": {
                 "offeringId": "offering-40516",
                 "payin": {
-                    "kind": "USD_LEDGER",
+                    "kind": "USD",
                     "amount": "500.00",
                     "paymentDetails": {}
                 },
                 "payout": {
-                    "kind": "BANK_STABLE",
+                    "kind": "BANK",
                     "paymentDetails": {
                         "accountNumber": "0x5566778899",
                         "reason": "Payment for services rendered"
@@ -198,7 +198,7 @@
                 {
                     "pair": "USD/BANK_STABLE",
                     "payin": {
-                        "kind": "USD_LEDGER",
+                        "kind": "USD",
                         "amount": "400.00",
                         "paymentDetails": {}
                     },
@@ -249,7 +249,7 @@
                 },
                 "payout": {
                     "currencyCode": "USD",
-                    "amount": "395.00"
+                    "amount": "400.00"
                 }
             }
         },
