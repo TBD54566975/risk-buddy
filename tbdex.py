@@ -6,7 +6,13 @@ If you are not sure, say 'no':
 
 ### Format
 
-Transaction Data: Some data to evaluate
+### Current transaction to validate:
+This will be some plain text data of the current transaction that we want to score as yes or no based on the rule
+
+### Hisorical transactions to consider:
+This is an optional section, which may be past transactions to consider when evaluating the rule.
+
+
 Rule: a description of a rule to apply to that data (only answer yes if you are pretty confident it matches that rule)
 User: Based on the rule above, does the Transaction Data violate that rule? IT IS CRITICAL that you answer 'yes' or 'no' with a short justification.
 Assistant: answer yes or no with justification.

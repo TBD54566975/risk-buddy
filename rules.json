@@ -31,11 +31,6 @@
             "message": "mismatching explanation and amount"
         },
         {
-            "condition": "the current transaction deviates a lot from the customer's historical behavior, for example a sudden large purchase",
-            "action": "risky",
-            "message": "Customer Behavioral change"
-        },
-        {
             "condition": "if they are purchasing a car or some other vehicle",
             "action": "risky",
             "message": "Don't like cars"
