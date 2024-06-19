@@ -14,7 +14,7 @@
                         "kind": "BANK_STABLE",
                         "paymentDetails": {
                             "accountNumber": "0x1122334455",
-                            "reason": "Payment for services rendered"
+                            "reason": "Payment for rental accomodation"
                         }
                     },
                     "estimatedSettlementTime": 5
@@ -37,7 +37,7 @@
                     "kind": "BANK_STABLE",
                     "paymentDetails": {
                         "accountNumber": "0x1122334455",
-                        "reason": "Payment for services rendered"
+                        "reason": "Payment for rental accomodation"
                     }
                 },
                 "claims": ["signed-credential"]
@@ -78,7 +78,7 @@
                         "kind": "BANK_STABLE",
                         "paymentDetails": {
                             "accountNumber": "0x5566778899",
-                            "reason": "Payment for services rendered"
+                            "reason": "Payment for rental accomodation"
                         }
                     },
                     "estimatedSettlementTime": 3
@@ -101,7 +101,7 @@
                     "kind": "BANK_STABLE",
                     "paymentDetails": {
                         "accountNumber": "0x5566778899",
-                        "reason": "Payment for services rendered"
+                        "reason": "Payment for rental accomodation"
                     }
                 },
                 "claims": ["signed-credential"]
@@ -121,7 +121,7 @@
                 },
                 "payout": {
                     "currencyCode": "USD",
-                    "amount": "195.00"
+                    "amount": "200.00"
                 }
             }
         },

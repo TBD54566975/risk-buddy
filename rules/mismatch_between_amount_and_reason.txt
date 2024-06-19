@@ -1,1 +1,0 @@
-If there is a mismatch between the transaction amount and the stated reason, mark it as high risk. This could be if the payment is for a large amount but the comment is for something trivial.

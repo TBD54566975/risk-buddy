@@ -7,8 +7,14 @@ import signal
 import time
 import logging
 import re
+import jsonschema
+from jsonschema import validate
+from asteval import Interpreter
+from datetime import datetime, timezone
+from dateutil.relativedelta import relativedelta
+from dateutil.parser import isoparse
 
-from tbdex import TBDEX_PROTOCOL_DESCRIPTION, TBDEX_JARGON
+from tbdex import make_prompt
 
 app = Flask(__name__)
 
@@ -21,14 +27,6 @@ LLAMAFILE_MODEL = "phi-3-mini-128k-instruct.Q8_0.gguf"
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
-# Utility functions
-def load_rules():
-    rules = []
-    for filename in os.listdir(RULES_DIR):
-        if filename.endswith('.txt'):
-            with open(os.path.join(RULES_DIR, filename), 'r') as file:
-                rules.append(file.read().strip())
-    return rules
 
 def json_to_human_readable(data, indent=0):
     human_readable = []
@@ -50,31 +48,18 @@ def json_to_human_readable(data, indent=0):
     return '\n'.join(human_readable)
 
 def call_llm_for_rule_evaluation(human_readable_data, rule):
-    prompt = (
-        f"{TBDEX_PROTOCOL_DESCRIPTION}\n\n"
-        f"{TBDEX_JARGON}\n\n"
-        f"Examples:\n"
-        f"User: \nTransaction Data: Here is a transaction with an amount of 0.0001 BTC.\nRule: Transactions above 10 BTC.\nAssistant: \nno\n"
-        f"User: \nTransaction Data: Here is a transaction with an amount of 15 BTC.\nRule: Transactions above 10 BTC.\nAssistant: \nyes\n"
-        f"User: \nTransaction Data: Here is a transaction to an unknown account.\nRule: Transactions to unknown accounts.\nAssistant: \nyes\n"
-        f"User: \nTransaction Data: Here is a transaction to a known account.\nRule: Transactions to unknown accounts.\nAssistant: \nno\n\n"
-        f"These are examples of how to reply.\n\n"
-        f"User: \nEvaluate the following transactional data against the rule and answer strictly with 'yes' or 'no'.\n\n"
-        f"Transaction Data:\n{human_readable_data}\n\n"
-        f"Rule: {rule}\n\n"
-        f"User: \Based on the rule above, does the Transaction Data violate that rule? Answer 'yes' or 'no'.\nAssistant: "
-    )
 
-    logging.info(f"Calling LLM with prompt: {prompt}")
+    prompt = make_prompt(human_readable_data, rule)
+    
 
     response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
         'prompt': prompt,
-        'n_predict': 10,
+        'n_predict': 200,
         'temperature': 0.0,
         'top_p': 0.9,
         'min_p': 0.4,
         'top_k': 50,
-        'stop': ["User:", "Assistant:"]
+        'stop': ["User:", "Assistant:", "Transaction Data:", "Rule:", "###"]
     })
     response_data = response.json()
     response_text = response_data['content'].strip().lower()
@@ -83,8 +68,11 @@ def call_llm_for_rule_evaluation(human_readable_data, rule):
 
     # Check for simple 'yes' or 'no' in the response
     match = re.search(r'\b(yes|no)\b', response_text)
-    if match:
-        return match.group(1) == 'yes'
+    if match:        
+        found =  match.group(1) == 'yes'
+        if found:
+            print("FOUND ONE")
+        return found
     else: 
         return False     
 
@@ -110,47 +98,140 @@ def run_llamafile():
     time.sleep(5)  # Wait for a few seconds to let the server start
     return llamafile_process
 
+def score_with_llm(data, rules):
+    data = request.json.get('data')    
+    
+    # Convert JSON data to human-readable format
+    human_readable_data = json_to_human_readable(data)
+    
+    # Evaluate each rule
+    high_risk_flagged = False
+    rules_matched = []
+    rules_checked = []
+    for i, rule in enumerate(rules):
+        rules_checked.append(rule['message'])
+        applies = call_llm_for_rule_evaluation(human_readable_data, rule['condition'])
+        if applies:
+            print("RULE APPLIES", rule)
+            rules_matched.append(rule['condition'])
+            high_risk_flagged = True
+    
+    if high_risk_flagged:
+        result = {
+            "score": "high",
+            "justification": f"The transaction was flagged as high risk due to rule: {rules_matched} with rules checked: {rules_checked}."
+        }
+    else:
+        result = {
+            "score": "low",
+            "justification": "None of the rules applied to this transaction."
+        }
+    
+    return jsonify(result)    
+
+def load_json(file_path):
+    with open(file_path, 'r') as file:
+        return json.load(file)
+
+
+
+
+
+def is_valid_expression(condition, aeval):
+    """Check if the condition is a valid expression."""
+    aeval(condition)
+    if aeval.error:
+        aeval.error = []
+        print("condition is not valid", condition)
+        return False
+    return True
+
+def evaluate_rules(transaction, history, rules):
+    """
+    Evaluate rules against the provided transaction and history.
+    
+    Uses asteval to safely evaluate deterministic expressions in the rules.
+    Calls LLM to evaluate fuzzy expressions.
+    """
+    aeval = Interpreter()
+    aeval.symtable['transaction'] = transaction
+    aeval.symtable['history'] = history
+    aeval.symtable['datetime'] = datetime
+    aeval.symtable['relativedelta'] = relativedelta
+    aeval.symtable['isoparse'] = isoparse
+    aeval.symtable['timezone'] = timezone
+    results = []
+
+    def call_llm(transaction, history, rule):
+        if history:
+            return call_llm_for_rule_evaluation("### Current transaction to validate:\n" +json_to_human_readable(transaction)+
+                                                "\n\n\n### Hisorical transactions to consider:\n" +json_to_human_readable(history), rule)                        
+        else:
+            return call_llm_for_rule_evaluation(json_to_human_readable(transaction), rule)
+
+    for rule in rules:
+        condition = rule['condition']
+        
+        if is_valid_expression(condition, aeval):
+            
+            # The whole condition is valid, evaluate directly
+            if aeval(condition):
+                results.append(rule['message'])
+        else:            
+            if call_llm(transaction, history, condition.strip()):
+                    results.append(rule['message'])
+
+
+    if len(results) > 0:
+        result = {
+            "score": "high",
+            "justification": f"The transaction was flagged as high risk due to the following rules: {results}."
+        }
+    else:
+        result = {
+            "score": "low",
+            "justification": "None of the rules applied to this transaction."
+        }     
+    return jsonify(result)       
+
+
+schema = load_json('schema.json')
+rules = load_json('rules.json')['rules']
+
 @app.route('/api/score', methods=['POST'])
 def score():
-    try:
-        data = request.json.get('data')
-        data_s = json.dumps(data)
+    #try:
+                
+        history = request.json.get('data') 
+        # data can be singular or a list of transactions with current one first. 
+        # Ensure history is always a list (handles single instance scenario)
+        if isinstance(history, dict):
+            history = [history]
+
+        # now lets check if we can evaluate these with rules, or fall back to score with llm alone
+        # validate each item in history against the schema
+        try:
+            for item in history:
+                validate(instance=item, schema=schema)
+            
+
+        except jsonschema.exceptions.ValidationError as err:
+            print(f"Data is not according to schema, will use LLM only: {err.message}")
+            return score_with_llm(request.json.get('data'), rules)
+            
+        # Evaluate rules against the transaction and history
+        # get the head and then tail as history 
+        print("Data is valid against schema.")                        
+        transaction = history[0]
+        history = history[1:]
+        return evaluate_rules(transaction, history, rules)
+
         
-        rules = load_rules()
         
-        # Convert JSON data to human-readable format
-        human_readable_data = json_to_human_readable(data)
-        
-        # Evaluate each rule
-        high_risk_flagged = False
-        rules_matched = []
-        rules_checked = []
-        for i, rule in enumerate(rules):
-            rule_name = f"Rule {i+1}"
-            rules_checked.append(rule_name)
-            applies = call_llm_for_rule_evaluation(human_readable_data, rule)
-            if applies:
-                print("RULE APPLIES", rule_name)
-                rules_matched.append(rule)
-                high_risk_flagged = True
-        
-        if high_risk_flagged:
-            result = {
-                "score": "high",
-                "justification": f"The transaction was flagged as high risk due to rule: {rules_matched} with rules checked: {rules_checked}."
-            }
-        else:
-            result = {
-                "score": "low",
-                "justification": "None of the rules applied to this transaction."
-            }
-        
-        return jsonify(result)
-        
-    except Exception as e:
-        error_message = str(e)
-        logging.error(f"Error: {error_message}")
-        return jsonify({'error': error_message}), 500
+    #except Exception as e:
+    #    error_message = str(e)
+    #    logging.error(f"Error: {error_message}")
+    #    return jsonify({'error': error_message}), 500
 
 if __name__ == '__main__':
     llamafile_process = run_llamafile()
@@ -159,3 +240,4 @@ if __name__ == '__main__':
     finally:
         llamafile_process.send_signal(signal.SIGINT)
         llamafile_process.wait()
+

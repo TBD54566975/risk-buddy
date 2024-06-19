@@ -1,7 +1,7 @@
 {
     "rules": [
         {
-            "condition": "len([pair for pair in transaction['offering']['currencyPairs'] if pair['payin']['kind'] == 'USD_LEDGER' and float(pair['payin']['amount']) > 300]) > 0",
+            "condition": "len([pair for pair in transaction['offering']['currencyPairs'] if pair['payin']['kind'] == 'USD_LEDGER' and float(pair['payin']['amount']) > 30000]) > 0",
             "action": "risky",
             "message": "Payin amount from USD_LEDGER is too high"
         },
@@ -21,9 +21,21 @@
             "message": "More than 3 transactions in the past 3 months"
         },
         {
-            "condition": "len([pair for pair in transaction['offering']['currencyPairs'] if float(pair['payin']['amount']) > 1000]) > 0 and (datetime.now() - isoparse(transaction['accountCreated'])).days < 30",
+            "condition": "len([pair for pair in transaction['offering']['currencyPairs'] if float(pair['payin']['amount']) > 1000]) > 0 and (datetime.now(timezone.utc) - isoparse(transaction['accountCreated'])).days < 30",
             "action": "risky",
             "message": "Transaction over 1000 and account is less than one month old"
+        },
+        {
+            "condition": "if the stated reason for the transaction doesn't match up with the magnitude of purchase",
+            "action": "risky",
+            "message": "mismatching explanation and amount"
+        },
+        {
+            "condition": "if they are purchasing a car or some other vehicle",
+            "action": "risky",
+            "message": "Don't like cars"
         }
+
+
     ]
 }
