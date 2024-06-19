@@ -10,7 +10,7 @@ import re
 import jsonschema
 from jsonschema import validate
 from asteval import Interpreter
-from datetime import datetime
+from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 from dateutil.parser import isoparse
 
@@ -172,6 +172,7 @@ def evaluate_rules(transaction, history, rules):
     aeval.symtable['datetime'] = datetime
     aeval.symtable['relativedelta'] = relativedelta
     aeval.symtable['isoparse'] = isoparse
+    aeval.symtable['timezone'] = timezone
     results = []
 
     def call_llm(transaction, history, rule):
