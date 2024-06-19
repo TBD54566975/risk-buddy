@@ -31,7 +31,7 @@
             "message": "mismatching explanation and amount"
         },
         {
-            "condition": "if they are purchasing a car or some other vehicle",
+            "condition": "if the reason field implies are purchasing a car or some other vehicle",
             "action": "risky",
             "message": "Don't like cars"
         }
