@@ -120,6 +120,46 @@ curl -X POST http://localhost:8080/api/score -H "Content-Type: application/json"
 }'
 ```
 
+# LLM and rule evaluation at runtime
+
+A rule may read like this: 
+
+```json
+        {
+            "condition": "if the stated reason for the transaction doesn't match up with the magnitude of purchase",
+            "action": "risky",
+            "message": "mismatching explanation and amount"
+        }
+```        
+
+
+And can be matched with the data via an LLM: 
+
+```shell
+INFO:root:LLM response: yes, the transaction data violates the rule. the reason for the transaction, which is payment for a coffee, does not match the magnitude of the purchase, which is $250.00. this discrepancy indicates a potential violation of the rule.
+```
+
+The data (abbreciated) woudl be something like: 
+
+```json
+                    "pair": "USD/BANK_STABLE",
+                    "payin": {
+                        "kind": "USD_LEDGER",
+                        "amount": "250.00",
+                        "paymentDetails": {}
+                    },
+                    "payout": {
+                        "kind": "BANK_STABLE",
+                        "paymentDetails": {
+                            "accountNumber": "0x1122334455",
+                            "reason": "Payment for a coffee"
+                        }
+                    },
+                    "estimatedSettlementTime": 5
+```
+
+Which intuitively (even if you are in Davos Switzerland) appears like too much for a coffee. 
+
 
 # Models
 
