@@ -31,15 +31,15 @@
             "message": "mismatching explanation and amount"
         },
         {
-            "condition": "the transaction pattern deviates significantly from the customer's usual behavior.",
+            "condition": "the transaction pattern deviates significantly from the customer's usual behavior in amounts they are spending.",
             "action": "risky",
             "message": "Customer Behavioral change"
         },
         {
-            "condition": "they are buying a car and len([tx for tx in history[1:] if tx['quote']['data']['expiresAt'] > (datetime.now() - relativedelta(months=3)).isoformat()]) > 2",
+            "condition": "the reason given is that for purchase of a car",
             "action": "risky",
-            "message": "Purchase of car and more than 2 transactions in the past 2 months"
-        }                
+            "message": "Don't like cars"
+        }
 
 
     ]

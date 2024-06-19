@@ -1,0 +1,17 @@
+{
+    "account_age_months": 1,
+    "current_transaction": {
+      "amount": 20000,
+      "transaction_type": "transfer",
+      "currency": "USD",
+      "from_account": "0x1234567890",
+      "to_account": "0x0987654321",
+      "reason": "Investment",
+      "frequency": "bi-weekly"
+    },
+    "transaction_history": [
+      {"amount": 8000, "transaction_type": "transfer", "currency": "USD"},
+      {"amount": 10000, "transaction_type": "purchase", "currency": "USD"},
+      {"amount": 20000, "transaction_type": "transfer", "currency": "USD"}
+    ]
+  }

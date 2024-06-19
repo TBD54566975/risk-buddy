@@ -58,16 +58,16 @@ def call_llm_for_rule_evaluation(human_readable_data, rule):
         f"User: \nTransaction Data: Here is a transaction to a known account.\nRule: Transactions to unknown accounts.\nAssistant: \nno\n\n"
         f"These are examples of how to reply.\n\n"
         f"User: \nEvaluate the following transactional data against the rule and answer strictly with 'yes' or 'no'.\n\n"
-        f"Transaction Data:\n{human_readable_data}\n\n"
-        f"Rule: {rule}\n\n"
-        f"User: \Based on the rule above, does the Transaction Data violate that rule? Answer 'yes' or 'no'.\nAssistant: "
+        f"{human_readable_data}\n\n"
+        f"Rule to check against: {rule}\n\n"
+        f"User: Based on the rule above, does the Transaction Data violate that rule? IT IS CRITICAL that you answer 'yes' or 'no'.\nAssistant: "
     )
 
     logging.info(f"Calling LLM with prompt: {prompt}")
 
     response = requests.post(f'http://localhost:{LLAMAFILE_PORT}/completion', json={
         'prompt': prompt,
-        'n_predict': 10,
+        'n_predict': 20,
         'temperature': 0.0,
         'top_p': 0.9,
         'min_p': 0.4,
@@ -81,8 +81,11 @@ def call_llm_for_rule_evaluation(human_readable_data, rule):
 
     # Check for simple 'yes' or 'no' in the response
     match = re.search(r'\b(yes|no)\b', response_text)
-    if match:
-        return match.group(1) == 'yes'
+    if match:        
+        found =  match.group(1) == 'yes'
+        if found:
+            print("FOUND ONE")
+        return found
     else: 
         return False     
 
@@ -173,42 +176,23 @@ def evaluate_rules(transaction, history, rules):
 
     def call_llm(transaction, history, rule):
         if history:
-            return call_llm_for_rule_evaluation("Current transaction to example\n" +json_to_human_readable(transaction)+
-                                                "\nHisorical transactions:\n" +json_to_human_readable(transaction), rule)
+            return call_llm_for_rule_evaluation("Current transaction:\n" +json_to_human_readable(transaction)+
+                                                "\n\n\nHisorical transactions:\n" +json_to_human_readable(history), rule)
         else:
             return call_llm_for_rule_evaluation(json_to_human_readable(transaction), rule)
 
     for rule in rules:
         condition = rule['condition']
-        print("!!!!!   -----> CONDITION:", condition)
         
         if is_valid_expression(condition, aeval):
             
             # The whole condition is valid, evaluate directly
-            print("!!!!!   -----> VALID")
             if aeval(condition):
                 results.append(rule['message'])
-        else:
-            print("here")
-            # Split the condition and evaluate parts
-            parts = condition.split(' and ')
-            part1_valid = is_valid_expression(parts[0], aeval)
-            part2_valid = len(parts) > 1 and is_valid_expression(parts[1], aeval)
-            print("here2")
+        else:            
+            if call_llm(transaction, history, condition.strip()):
+                    results.append(rule['message'])
 
-            if part1_valid and part2_valid:
-                if aeval(parts[0]) and aeval(parts[1]):
-                    results.append(rule['message'])
-            elif part1_valid:
-                if aeval(parts[0]) and call_llm(transaction, history, parts[1].strip()):
-                    results.append(rule['message'])
-            elif part2_valid:
-                if aeval(parts[1]) and call_llm(transaction, history, parts[0].strip()):
-                    results.append(rule['message'])
-            else:
-                # Both parts are fuzzy
-                if call_llm(transaction, history, condition.strip()):
-                    results.append(rule['message'])
 
     if len(results) > 0:
         result = {
@@ -228,7 +212,7 @@ rules = load_json('rules.json')['rules']
 
 @app.route('/api/score', methods=['POST'])
 def score():
-    try:
+    #try:
                 
         history = request.json.get('data') 
         # data can be singular or a list of transactions with current one first. 
@@ -256,10 +240,10 @@ def score():
 
         
         
-    except Exception as e:
-        error_message = str(e)
-        logging.error(f"Error: {error_message}")
-        return jsonify({'error': error_message}), 500
+    #except Exception as e:
+    #    error_message = str(e)
+    #    logging.error(f"Error: {error_message}")
+    #    return jsonify({'error': error_message}), 500
 
 if __name__ == '__main__':
     llamafile_process = run_llamafile()
