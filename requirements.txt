@@ -1,9 +1,6 @@
 flask
 requests
-transformers
-chromadb
-sentence_transformers
-pandas
-tabulate
 jsonschema
+python-dateutil
 asteval
+colorama
