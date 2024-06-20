@@ -1,13 +1,14 @@
 import requests
 import json
 import os
-
+from colorama import Fore, Style, Back
+import colorama
 
 def load_schema(file_path):
     with open(file_path) as f:
         return json.load(f)
 
-def call_llm(prompt, api_key):
+def call_llm(prompt, api_key, temperature=0.1):
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}"
@@ -15,7 +16,7 @@ def call_llm(prompt, api_key):
     data = {
         "model": "gpt-4o",
         "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.1
+        "temperature": temperature
     }
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=data)
     return response.json()
@@ -31,7 +32,7 @@ The data will take the form of transaction json objects, which conform to the fo
 The schema for transactions and history is as follows:
 {json.dumps(schema, indent=4)}
 
-history is a list of past transactions (as a dict).
+history is a list of past transactions.
 
 The rules are evaluated using the following logic in Python code:
 
@@ -54,6 +55,14 @@ def evaluate_rules(transaction, history, rules):
     aeval.symtable['relativedelta'] = relativedelta
     aeval.symtable['isoparse'] = isoparse
     aeval.symtable['timezone'] = timezone    
+
+history = request.json.get('data') 
+# data can be singular or a list of transactions with current one first. 
+# Ensure history is always a list (handles single instance scenario)
+if isinstance(history, dict):
+    history = [history]
+transaction = history[0]
+history = history[1:]
 
 .. 
 and evaluated with aeval(rule string).
@@ -86,7 +95,7 @@ def correct_rule(rule, error_msg, synth_data, previous_prompt, api_key):
         Return just the rule as text, not markdown, just a single line of text please.
     """
 
-    response_data = call_llm(prompt, api_key)
+    response_data = call_llm(prompt, api_key, temperature=0.9)
     return response_data['choices'][0]['message']['content'], prompt
 
 
@@ -102,6 +111,7 @@ def synthesize_data_from_schema(schema, api_key):
     """
     response_data = call_llm(prompt, api_key)
     raw = response_data['choices'][0]['message']['content']
+
     ## now get result from between ```json .... ```
     return raw.split('```json')[1].split('```')[0].strip()
     
@@ -113,7 +123,7 @@ def validate_rule_with_synthetic_data(rule, data):
     from dateutil.relativedelta import relativedelta
     from dateutil.parser import isoparse
     transaction = data
-    history = [data]
+    history = [data, data]
 
     aeval = Interpreter()
     aeval.symtable['transaction'] = transaction
@@ -131,25 +141,39 @@ def validate_rule_with_synthetic_data(rule, data):
 
 
 def main():
+    colorama.init(autoreset=True)
+
     schema = load_schema('schema.json')
     api_key = os.getenv('OPENAI_API_KEY')
     if not api_key:
-        print("API key not found. Make sure OPENAI_API_KEY environment variable is set.")
+        print(Fore.RED + "API key not found. Make sure OPENAI_API_KEY environment variable is set.")
         return    
 
-    description = input("Enter the natural language rule description: ")
+    print(Fore.CYAN + Style.BRIGHT + "Welcome to the Rule Generator!")
+    description = input(Fore.YELLOW + "Enter the natural language rule description: ")
+    
+    print(Fore.MAGENTA + "Generating rule from description...")
     rule, prompt = generate_rule_from_description(description, schema, api_key)
-    print("The rule generated:", rule)
-    print("Will validate the rule now. Generating synthetic data to test with ... ")
-
+    print(Fore.GREEN + "The rule generated:\n" + Fore.WHITE + Back.GREEN + "    " + rule)
+    
+    print(Fore.MAGENTA + "Will validate the rule now. Generating synthetic data to test with ...")
     synth_data = synthesize_data_from_schema(schema, api_key)
-    print("Now testing with synthetic data ... ")
-    err = validate_rule_with_synthetic_data(rule, synth_data)
-    if err:
-        print("Rule validation failed with synthetic data. will try to correct it...")
-        corrected_rule, prompt = correct_rule(rule=rule, error_msg=err, synth_data=synth_data, previous_prompt=prompt, api_key=api_key)
-        print("The rule generated:", corrected_rule)
+    
+    max_attempts = 5
+    for attempt in range(max_attempts):
+        print(Fore.MAGENTA + f"Now testing with synthetic data (Attempt {attempt + 1}/{max_attempts}) ...")
+        err = validate_rule_with_synthetic_data(rule, synth_data)
+        if not err:
+            print(Fore.GREEN + "Rule validation successful!")
+            break
+        else:
+            print(Fore.RED + f"Rule validation failed with synthetic data (Attempt {attempt + 1}/{max_attempts}). Will try to correct it...")
+            rule, prompt = correct_rule(rule=rule, error_msg=err, synth_data=synth_data, previous_prompt=prompt, api_key=api_key)
+            print(Fore.GREEN + "The corrected rule generated:\n" + Fore.WHITE + Back.GREEN + "    " + rule)
+    else:
+        print(Fore.RED + "Failed to validate the rule after 5 attempts.")
 
+    print(Fore.CYAN + Style.BRIGHT + "Process completed. Thank you for using the Rule Generator!")
 
 
 
