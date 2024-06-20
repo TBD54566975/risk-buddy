@@ -67,13 +67,20 @@ history = history[1:]
 .. 
 and evaluated with aeval(rule string).
 
+For example: 
+rule description: Payin amount from USD_LEDGER is too high
+expression: len([pair for pair in transaction['offering']['currencyPairs'] if pair['payin']['kind'] == 'USD_LEDGER' and float(pair['payin']['amount']) > 30000]) > 0
+
+
+
+
 Now, based on the above information, convert the following natural language description into an executable rule:
 \"\"\"
 {description}
 \"\"\"
 
 The rule should be a Python expression that evaluates to True or False based on the data provided, not assigned to a variable. 
-Return just the rule as text, not markdown, just a single line of text please.
+Return just the rule as text, not markdown, just a single line of text please, no extra quotes. Please avoid using generator expressions and instead use list comprehensions or other supported constructs.
 """
     
     
@@ -90,9 +97,7 @@ def correct_rule(rule, error_msg, synth_data, previous_prompt, api_key):
 
         Error: {error_msg}
 
-        Please correct the rule expression to be valid Python code that evaluates to True or False based on the data provided.
-        The rule should be a Python expression that evaluates to True or False based on the data provided, not assigned to a variable. 
-        Return just the rule as text, not markdown, just a single line of text please.
+        Please correct the rule expression.
     """
 
     response_data = call_llm(prompt, api_key, temperature=0.9)
@@ -113,7 +118,8 @@ def synthesize_data_from_schema(schema, api_key):
     raw = response_data['choices'][0]['message']['content']
 
     ## now get result from between ```json .... ```
-    return raw.split('```json')[1].split('```')[0].strip()
+    synth =  raw.split('```json')[1].split('```')[0].strip()
+    return json.loads(synth)
     
 
 def validate_rule_with_synthetic_data(rule, data):
@@ -173,7 +179,29 @@ def main():
     else:
         print(Fore.RED + "Failed to validate the rule after 5 attempts.")
 
-    print(Fore.CYAN + Style.BRIGHT + "Process completed. Thank you for using the Rule Generator!")
+    user_response = input(Fore.CYAN + Style.BRIGHT + "Process completed. Do you want to add the rule to rules.json? (yes/no): ").strip().lower()
+    if user_response == 'yes':
+        rules_file_path = 'rules.json'
+        if os.path.exists(rules_file_path):
+            with open(rules_file_path, 'r') as f:
+                rules_data = json.load(f)
+        else:
+            rules_data = {"rules": []}
+        
+        new_rule = {
+            "condition": rule,
+            "action": "risky",
+            "message": description
+        }
+        rules_data["rules"].append(new_rule)
+        
+        with open(rules_file_path, 'w') as f:
+            json.dump(rules_data, f, indent=4)
+        
+        print(Fore.GREEN + "Rule added to rules.json successfully.")
+    else:
+        print(Fore.CYAN + "Rule was not added to rules.json.")
+
 
 
 
