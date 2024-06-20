@@ -8,10 +8,13 @@ download-models:
 
 # Command to run the development server, dependent on downloading the model
 dev: download-models
+	pip install -r requirements.txt
 	python main.py
 
 
 test:
 	python test.py
 
-	
+
+rules:
+	python rule_assistant.py	
