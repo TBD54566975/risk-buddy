@@ -26,12 +26,20 @@ def generate_rule_from_description(description, schema, api_key):
 You are an assistant in financial risk assessment. 
 You need to convert natural language descriptions of rules into executable expressions based on the data given. 
 
-The data will take the form of transactions and history json objects, which conform to the following schema: 
+The data will take the form of transaction json objects, which conform to the following schema: 
 
 The schema for transactions and history is as follows:
 {json.dumps(schema, indent=4)}
 
+history is a list of past transactions (as a dict).
+
 The rules are evaluated using the following logic in Python code:
+
+from asteval import Interpreter
+from datetime import datetime, timezone
+from dateutil.relativedelta import relativedelta
+from dateutil.parser import isoparse
+
 def evaluate_rules(transaction, history, rules):
     \"""
     Evaluate rules against the provided transaction and history.
@@ -68,12 +76,10 @@ Return just the rule as text, not markdown, just a single line of text please.
 def correct_rule(rule, error_msg, synth_data, previous_prompt, api_key):
     prompt = f"""
         {previous_prompt}
+
         {rule}
 
-        This rule expression produced the following error: {error_msg}
-
-        The synthetic data used to test the rule was:
-        {synth_data}
+        Error: {error_msg}
 
         Please correct the rule expression to be valid Python code that evaluates to True or False based on the data provided.
         The rule should be a Python expression that evaluates to True or False based on the data provided, not assigned to a variable. 
