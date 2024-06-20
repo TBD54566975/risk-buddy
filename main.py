@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 from dateutil.parser import isoparse
 
-from tbdex import make_prompt
+from scoring_prompt import make_prompt
 
 app = Flask(__name__)
 
