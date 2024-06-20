@@ -1,7 +1,7 @@
 # Experimental risk scoring engine
 
-This is an approach that is using SLMs/LLMs combined with rules in natural language and predicate logic to score risk (an ensemble approach for risk scoring).
-Uses a local language model to evaluate rules against data and a local rule engine.
+Create a transaction risk score engine (go/no go on risk) using an approach that is using SLMs/LLMs combined with rules in natural language and predicate logic (an ensemble approach for risk scoring).
+Uses a local language model to evaluate rules against data and a local rule engine. This can be inserted at any stage of transaction processing, to help decide if a given transaction should be reviewed or rejected etc.
 (No data leaves the server at runtime).
 
 ## Aims
@@ -27,21 +27,24 @@ If we can use simple predicate logic, we should. No need for deep models or LLMs
 ### Building confidence in transactions
 By combining knowledge in rules and models, confidence in transactions can increase. Hopefully rules can be shared, or fine tuned models can also be shared in future. 
 
+### Data privacy
+No data should leave the server. 
+
 # Does it work? 
 
 Yes quite well in some parts, other bits, sort of?
 
-Here it is matching data against a rule in plain language: 
+Here it is matching data against a rule in that uses "common sense" reasoning in plain language: 
 ![image](https://github.com/TBD54566975/risk-buddy/assets/14976/db03921c-558b-48f9-b1da-961c44633e08)
 
 And here it is translating from natural language to a predicate rule: 
-
 ![Pasted Graphic 6](https://github.com/TBD54566975/risk-buddy/assets/14976/1aa8a263-f835-4fa6-8dd2-9b154065f798)
 
 Read on!
 
 
 ## Getting started
+
 1. Install requirements:
 ```bash
 pip install -r requirements.txt
@@ -55,20 +58,17 @@ just dev
 3. Test:
 ```bash
 just test
-```   
+```
 
-## Rules
-
-* Rules are stored in `rules.json` with a plain text message of what the rule means if it activates and the "if" condition (which can be plain text or predicate logic expression).
-* `python main.py` 
-* You can edit rules by hand 
+4. Editing rules:
+```bash
+just rules
+```
 
 
 ## API
 
-Simple text based access - really any format can work. 
-
-Then to access: 
+Simple text based access - really any format can work to start with, it will do its best to apply the rules: 
 
 ```sh
 curl -X POST http://localhost:8080/api/score -H "Content-Type: application/json" -d '{
@@ -78,8 +78,6 @@ curl -X POST http://localhost:8080/api/score -H "Content-Type: application/json"
   }
 }'
 ```
-
-
 
 Try another more complex one: 
 ```sh
@@ -111,56 +109,56 @@ Output:
 ```
 
 
-## Example with transaction history: 
+### API details
 
-```sh
-curl -X POST http://localhost:8080/api/score -H "Content-Type: application/json" -d '{
-  "data": {
-    "account_age_months": 2,
-    "current_transaction": {
-      "amount": 22000,
-      "transaction_type": "investment",
-      "currency": "USD",
-      "from_account": "0x1234567890",
-      "to_account": "0x0987654321",
-      "reason": "Investment in unknown assets",
-      "date": "2024-05-01",
-      "frequency": "monthly"
-    },
-    "transaction_history": [
-      {
-        "amount": 8000,
-        "transaction_type": "investment",
-        "currency": "USD",
-        "from_account": "0x1234567890",
-        "to_account": "0x0987654321",
-        "reason": "Investment in new venture",
-        "date": "2024-04-01"
-      },
-      {
-        "amount": 10000,
-        "transaction_type": "investment",
-        "currency": "USD",
-        "from_account": "0x1234567890",
-        "to_account": "0x0987654321",
-        "reason": "Investment in stocks",
-        "date": "2024-04-15"
-      },
-      {
-        "amount": 22000,
-        "transaction_type": "investment",
-        "currency": "USD",
-        "from_account": "0x1234567890",
-        "to_account": "0x0987654321",
-        "reason": "Investment in unknown assets",
-        "date": "2024-04-25"
-      }
-    ]
-  }
-}'
+There is a `rules.json` and `schema.json` that define the rules to apply and the data format (if any) expected to be passed in. The `schema.json` file is any valid json schema you like. 
+The data passed to the score endpoint can be a list of items that match that schema. The *first* item in the list is deemed to be the transaction to be scored. Any additional items are deemed to be the history (which rules may take into account). 
+
+Out of the box there is a schema.json which is an approximate one for tbdex.
+
+The rules can then express conditions on which a transaction is risky, either via expression style predicate logic, this is an example rule: 
+
+```json
+        {
+            "condition": "len([pair for pair in transaction['offering']['currencyPairs'] if float(pair['payin']['amount']) > 1000]) > 0 and (datetime.now(timezone.utc) - isoparse(transaction['accountCreated'])).days < 30",
+            "action": "risky",
+            "message": "Transaction over 1000 and account is less than one month old"
+        }
 ```
 
-# LLM and rule evaluation at runtime
+This then uses the data structure in `schema.json` if it can to apply the condition as an expression. 
+This format is fairly verbose, so use `just rules` to help you write it. 
+
+What if the data doesn't match schema.json? what if the rule can't be expressed that way? 
+
+This is why rules can be expressed in natural language and evaluated at runtime: 
+
+```json
+        {
+            "condition": "if the stated reason for the transaction doesn't match up with the magnitude of purchase",
+            "action": "risky",
+            "message": "mismatching explanation and amount"
+        }
+```
+(hard to describe this one with predicate logic, but you know it when you see it!)
+
+
+
+
+
+# How it works
+
+## Rules and SLM
+
+* Rules are stored in `rules.json` with a plain text message of what the rule means if it activates and the "if" condition (which can be plain text or predicate logic expression). 
+* You can edit rules by hand or with `just rules` human rule editor which takes plain language rules and translates it to an expression language ahead of time
+* Rules are evaluated at runtime as expressions (basically logic and if statements) or an SLM depending on if they are in natural language or not (automatically detected)
+* The `asteval` library is used to evaluate predicate logic style expressions (which have been hand written or written with `just rules` from natural language) providing isolation
+* Predicate rules using expressions work as long as there is a `schema.json` which describes the expected data format. If the data doesn't match that format, then it will try to use the SLM to evaluate the rules as best it can.
+* At runtime it will see if the data matches the schema, or if a rule condition works with schema and the data, and apply it accordingly (as an expression if it is one or a natural language rule - again, automatic).
+
+
+## SLM and rule evaluation at runtime
 
 A rule may read like this: 
 
@@ -179,7 +177,7 @@ And can be matched with the data via an LLM:
 INFO:root:LLM response: yes, the transaction data violates the rule. the reason for the transaction, which is payment for a coffee, does not match the magnitude of the purchase, which is $250.00. this discrepancy indicates a potential violation of the rule.
 ```
 
-The data (abbreciated) woudl be something like: 
+The data (abbreciated) would be something like: 
 
 ```json
                     "pair": "USD/BANK_STABLE",
@@ -198,31 +196,30 @@ The data (abbreciated) woudl be something like:
                     "estimatedSettlementTime": 5
 ```
 
-Which intuitively (even if you are in Davos Switzerland) appears like too much for a coffee. 
+Which intuitively appears like too much for a coffee (even if you are in Davos Switzerland).
 
 
-# Models
+## Models
 
-Currently have been looking at the `phi3` model from MSFT, which is ASF2 licensed, and quite good at reasoning yet small.
+Currently have been looking at the `phi3` model family from MSFT, which is ASF2 licensed, and quite good at reasoning yet small and can run in many places.
 The 128k variant is favoured as it can comprehend a realistic set of rules and data in one hit. Read more here: https://huggingface.co/microsoft/Phi-3-mini-128k-instruct
 You can also use models like Meta-Llama-3-8B.Q8_0.gguf, however the prompt will need adjusting. One future enhancement is to use a consensus of 3 disparate models (once prompts are tuned for each).
 
-Update: llama3 seems to work better reasoning over human readable data.
-
 ## Hosting models
 
-For this to work an LLM model has to be hosted. Currently using llamafiles for developtime experience with models from huggingface. 
-
-### Llama files
+Currently using llamafiles for a simple experience with models from huggingface (gguf format). The required model will be downloaded by `just dev` the first time it is run. 
 Llamafiles are a convenient way to run from Mozilla built on llama.cpp. [See this](https://github.com/Mozilla-Ocho/llamafile). 
-
 Llamafile is a x-platform executable which can be a whole model or can run gguf weights (currently using the latter per model). For example https://huggingface.co/MoMonir/Phi-3-mini-128k-instruct-GGUF - this is a 128k model which can be run with the llamafile. 
 
-### Other ways of hosting models
+# Ideas, Enhancements and next steps
 
-There are other ways to host models which are not out of the box or platform limited:
-
-* TGI from huggingface is convenient: https://github.com/huggingface/text-generation-inference (docker based, but AMD64 only -  provent at scale server side hosting)
-* https://github.com/vllm-project/vllm - linux specific ways to host LLMs.
-* Ollama: this is technically more of a desktop platform, but is convenient (and written in golang). Downsides are that it has out of the box more limited set of models (but you can import them via modelfiles from gguf - so it is viable and convenient in some cases). It can also serve multiple models from one port whereas llamafiles is just one model per port.
+* Get some more data to test from!
+* Make some more rules (both logic rules and natural language to try)
+* Create scoring test suite (so can try different rule approaches)
+* Fine tuning of models for this type of scoring (perhaps using huggingface)
+* Allow editing of rules in a "live" spreadsheet (google sheets or similar) so you can have data and rules side by side as a workbench
+* Try calling SLM multiple times with high temperature to get best results
+* Try multiple models for convergance on answers
+* Just In Time (JIT) generation of rules from human form to an expression against detected shape of data as it comes in (as data schemas may be dynamical)
+* Rules are currently evaluated by the SLM one at a time, perhaps in bulk could be more efficient (if there are 100s/1000s of rules)
 
