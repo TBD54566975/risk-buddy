@@ -1,10 +1,45 @@
 # Experimental risk scoring engine
 
-Looking at using SLMs/LLMs combined with rules in natural language to score risk (potentialy part of an ensemble approach for risk scoring).
-Uses a local language model to evaluate rules against data, and builds embeddings on the fly to match with possibly similar transactions and entities to provide context.
-(No data leaves the server).
+This is an approach that is using SLMs/LLMs combined with rules in natural language and predicate logic to score risk (an ensemble approach for risk scoring).
+Uses a local language model to evaluate rules against data and a local rule engine.
+(No data leaves the server at runtime).
 
-![image](https://github.com/TBD54566975/risky-buddy/assets/14976/3d5cb56c-f94a-466c-babb-f0c2fb8924b3)
+## Aims
+
+<img src="https://github.com/TBD54566975/risky-buddy/assets/14976/3d5cb56c-f94a-466c-babb-f0c2fb8924b3" width="300">
+
+### Cold start problem
+The cold start problem with risk is that you need a lot of data to train models. This can be addressed by using inference type rules, and also LLMs which have "common sense" reasoning knowledge in concert
+
+### Run with modest hardware
+Expression style rules run fast and anywhere, and SLMs can now run on modest hardware. LLMs can be used at "rule authoring" time to provide assistance and data synthesis. 
+
+### Deal with variable data formats
+With a messaging protocol like tbdex the exact details of exchange of values may vary over time or per exchange, meaning it may not be clear at all times what fields will be available to validate against. 
+
+### Allow expressiveness
+Some things are hard to express as strict logic such as "if the stated reason for the transaction doesn't match up with the magnitude of purchase" but it would be nice to be able to use these as rules. 
+This simple natural language expressiveness can capture learned human agent knowledge, and either ahead of time compile it to a predicate logic rule (via an LLM), or evaluate it at runtime via an SLM. 
+
+### Use logic
+If we can use simple predicate logic, we should. No need for deep models or LLMs when a nice if statement will do! 
+
+### Building confidence in transactions
+By combining knowledge in rules and models, confidence in transactions can increase. Hopefully rules can be shared, or fine tuned models can also be shared in future. 
+
+# Does it work? 
+
+Yes quite well in some parts, other bits, sort of?
+
+Here it is matching data against a rule in plain language: 
+![image](https://github.com/TBD54566975/risk-buddy/assets/14976/db03921c-558b-48f9-b1da-961c44633e08)
+
+And here it is translating from natural language to a predicate rule: 
+
+![Pasted Graphic 6](https://github.com/TBD54566975/risk-buddy/assets/14976/1aa8a263-f835-4fa6-8dd2-9b154065f798)
+
+Read on!
+
 
 ## Getting started
 1. Install requirements:
@@ -12,16 +47,21 @@ Uses a local language model to evaluate rules against data, and builds embedding
 pip install -r requirements.txt
 ```
 
-2. Run:
+2. Run the server:
 ```bash
 just dev
 ```
 
-## Setup 
+3. Test:
+```bash
+just test
+```   
 
-* Create rules in `rules/` in plain language
+## Rules
+
+* Rules are stored in `rules.json` with a plain text message of what the rule means if it activates and the "if" condition (which can be plain text or predicate logic expression).
 * `python main.py` 
-* Pass in data (any format wrapped in json can work), see below for examples and get a score and justification back.
+* You can edit rules by hand 
 
 
 ## API
