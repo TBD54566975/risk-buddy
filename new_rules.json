@@ -1,0 +1,39 @@
+{
+    "rules": [
+        {
+            "Condition": "len([pair for pair in transaction['offering']['currencyPairs'] if pair['payin']['kind'] == 'USD_LEDGER' and float(pair['payin']['amount']) > 30000]) > 0",
+            "Action": "risky",
+            "Message": "Payin amount from USD_LEDGER is too high"
+        },
+        {
+            "Condition": "len([pair for pair in transaction['offering']['currencyPairs'] if pair['estimatedSettlementTime'] > 10]) > 0",
+            "Action": "risky",
+            "Message": "Estimated settlement time is too long"
+        },
+        {
+            "Condition": "len([pair for pair in transaction['offering']['currencyPairs'] if not pair['payout']['paymentDetails'].get('reason')]) > 0",
+            "Action": "risky",
+            "Message": "Payout reason is missing or empty"
+        },
+        {
+            "Condition": "len([tx for tx in history[1:] if tx['quote']['data']['expiresAt'] > (datetime.now() - relativedelta(months=3)).isoformat()]) > 3",
+            "Action": "risky",
+            "Message": "More than 3 transactions in the past 3 months"
+        },
+        {
+            "Condition": "len([pair for pair in transaction['offering']['currencyPairs'] if float(pair['payin']['amount']) > 1000]) > 0 and (datetime.now(timezone.utc) - isoparse(transaction['accountCreated'])).days < 30",
+            "Action": "risky",
+            "Message": "Transaction over 1000 and account is less than one month old"
+        },
+        {
+            "Condition": "if the stated reason for the transaction doesn't match up with the magnitude of purchase",
+            "Action": "risky",
+            "Message": "mismatching explanation and amount"
+        },
+        {
+            "Condition": "if the reason field implies are purchasing a car or some other vehicle",
+            "Action": "risky",
+            "Message": "Don't like cars"
+        }
+    ]
+}
