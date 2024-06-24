@@ -1,0 +1,53 @@
+name: Test Project
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install Hermit
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/cashapp/hermit/main/bin/install.sh | bash
+          . ~/.hermit/environment
+
+      - name: Cache Hermit, Pip packages
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/pip
+            .hermit
+            .hermit/bin
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          . ~/.hermit/environment
+          hermit install
+          pip install just
+
+      - name: Start Dev Server
+        run: |
+          . ~/.hermit/environment
+          nohup just dev &
+          sleep 10 # Wait for dev server to start
+
+      - name: Run Tests
+        run: |
+          . ~/.hermit/environment
+          just test
+
+      - name: Shutdown Dev Server
+        run: |
+          pkill -f 'python main.py' || true # Gracefully kill the server process

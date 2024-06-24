@@ -1,0 +1,8 @@
+Condition,Action,Message
+len([pair for pair in transaction['offering']['currencyPairs'] if pair['payin']['kind'] == 'USD_LEDGER' and float(pair['payin']['amount']) > 30000]) > 0,risky,Payin amount from USD_LEDGER is too high
+len([pair for pair in transaction['offering']['currencyPairs'] if pair['estimatedSettlementTime'] > 10]) > 0,risky,Estimated settlement time is too long
+len([pair for pair in transaction['offering']['currencyPairs'] if not pair['payout']['paymentDetails'].get('reason')]) > 0,risky,Payout reason is missing or empty
+len([tx for tx in history[1:] if tx['quote']['data']['expiresAt'] > (datetime.now() - relativedelta(months=3)).isoformat()]) > 3,risky,More than 3 transactions in the past 3 months
+len([pair for pair in transaction['offering']['currencyPairs'] if float(pair['payin']['amount']) > 1000]) > 0 and (datetime.now(timezone.utc) - isoparse(transaction['accountCreated'])).days < 30,risky,Transaction over 1000 and account is less than one month old
+if the stated reason for the transaction doesn't match up with the magnitude of purchase,risky,mismatching explanation and amount
+if the reason field implies are purchasing a car or some other vehicle,risky,Don't like cars
